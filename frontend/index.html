@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surf App Tester - Quality Gate Platform</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-card: #ffffff;
+            --accent-primary: #0ea5e9;
+            --accent-secondary: #06b6d4;
+            --accent-success: #10b981;
+            --accent-danger: #ef4444;
+            --accent-warning: #f59e0b;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 24px;
+            animation: slideInDown 0.5s ease-out;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .brand-text h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .brand-text p {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-tertiary);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: slideInUp 0.5s ease-out;
+            color: white;
+        }
+
+        .upload-section:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .upload-section h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .upload-section p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+            animation: slideInUp 0.5s ease-out 0.1s both;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-primary);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .stat-icon {
+            font-size: 28px;
+        }
+
+        .stat-trend {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: #dcfce7;
+            color: var(--accent-success);
+        }
+
+        .stat-trend.negative {
+            background: #fee2e2;
+            color: var(--accent-danger);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--accent-primary);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* Two Column Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+            animation: slideInUp 0.5s ease-out 0.2s both;
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        /* Analysis Items */
+        .analysis-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .analysis-item:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(3px);
+            box-shadow: var(--shadow);
+        }
+
+        .analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .analysis-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .analysis-status {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-approved {
+            background: #dcfce7;
+            color: var(--accent-success);
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: var(--accent-danger);
+        }
+
+        .status-analyzing {
+            background: #fef3c7;
+            color: var(--accent-warning);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .analysis-details {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .service-tag {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .progress-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .metric-item {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--accent-primary);
+        }
+
+        /* Terminal */
+        .terminal {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            line-height: 1.7;
+        }
+
+        .terminal-line {
+            margin-bottom: 4px;
+            display: flex;
+            gap: 10px;
+            color: #94a3b8;
+        }
+
+        .terminal-timestamp {
+            color: #64748b;
+            min-width: 65px;
+        }
+
+        .terminal-content {
+            flex: 1;
+        }
+
+        .terminal-line.success .terminal-content {
+            color: #10b981;
+        }
+
+        .terminal-line.error .terminal-content {
+            color: #ef4444;
+        }
+
+        .terminal-line.warning .terminal-content {
+            color: #f59e0b;
+        }
+
+        .terminal-line.info .terminal-content {
+            color: #3b82f6;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions {
+                justify-content: space-between;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .upload-section {
+                padding: 30px 20px;
+            }
+
+            .status-badge {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+
+            header {
+                padding: 16px;
+            }
+
+            .brand-text h1 {
+                font-size: 18px;
+            }
+
+            .btn {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+        }
+
+        /* Scrollbar */
+        .terminal::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .terminal::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        .terminal::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [uploadedFile, setUploadedFile] = useState(null);
+            const [isAnalyzing, setIsAnalyzing] = useState(false);
+            const [securityMetrics, setSecurityMetrics] = useState({
+                vulnerabilities: 0,
+                s1Defects: 0,
+                s2Defects: 0,
+                permissions: 0
+            });
+
+            const [analyses, setAnalyses] = useState([
+                {
+                    id: 1,
+                    name: 'SAST Analysis',
+                    status: 'pending',
+                    progress: 0,
+                    details: 'Aguardando upload de APK para iniciar',
+                    service: 'apk_analyzer.py'
+                },
+                {
+                    id: 2,
+                    name: 'Mobile Tests',
+                    status: 'pending',
+                    progress: 0,
+                    details: 'Aguardando SAST para iniciar testes',
+                    service: 'test_runner.py'
+                },
+                {
+                    id: 3,
+                    name: 'Quality Gate',
+                    status: 'pending',
+                    progress: 0,
+                    details: 'Aguardando testes para avaliar critérios',
+                    service: 'quality_gate.py'
+                },
+            ]);
+
+            const [stats, setStats] = useState({
+                testsRun: 0,
+                passed: 0,
+                failed: 0,
+                coverage: 0
+            });
+
+            const [logs, setLogs] = useState([
+                { type: 'info', text: 'Platform initialized', time: new Date().toLocaleTimeString('pt-BR', { hour12: false }) }
+            ]);
+
+            // Busca estatísticas do backend ao carregar
+            useEffect(() => {
+                const fetchStats = async () => {
+                    try {
+                        const response = await fetch('/api/stats');
+                        const data = await response.json();
+                        setStats(data);
+                    } catch (error) {
+                        console.error('Erro ao buscar stats:', error);
+                    }
+                };
+                fetchStats();
+            }, []);
+
+            const handleFileUpload = async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+
+                const time = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+                
+                try {
+                    setLogs(prev => [...prev, { 
+                        type: 'info', 
+                        text: `Uploading ${file.name}...`, 
+                        time 
+                    }]);
+
+                    const formData = new FormData();
+                    formData.append('arquivo', file);
+
+                    const response = await fetch('/api/upload-apk', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        setUploadedFile(file.name);
+                        setLogs(prev => [...prev, { 
+                            type: 'success', 
+                            text: `APK uploaded: ${file.name} (${data.size})`, 
+                            time 
+                        }]);
+                    } else {
+                        setLogs(prev => [...prev, { 
+                            type: 'error', 
+                            text: `Upload failed: ${data.message}`, 
+                            time 
+                        }]);
+                    }
+                } catch (error) {
+                    setLogs(prev => [...prev, { 
+                        type: 'error', 
+                        text: `Error: ${error.message}`, 
+                        time 
+                    }]);
+                }
+            };
+
+            const handleRunAnalysis = async () => {
+                if (!uploadedFile) {
+                    const time = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+                    setLogs(prev => [...prev, {
+                        type: 'error',
+                        text: 'Por favor, faça upload de um APK primeiro',
+                        time
+                    }]);
+                    return;
+                }
+
+                setIsAnalyzing(true);
+                const time = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+
+                // Inicia SAST Analysis
+                setAnalyses(prev => prev.map((a, idx) => ({
+                    ...a,
+                    status: idx === 0 ? 'analyzing' : 'pending',
+                    progress: idx === 0 ? 30 : 0,
+                    details: idx === 0 ? 'Executando análise de segurança...' : a.details
+                })));
+
+                setLogs(prev => [...prev, {
+                    type: 'info',
+                    text: 'Iniciando pipeline de análise...',
+                    time
+                }]);
+
+                try {
+                    const formData = new FormData();
+                    const fileInput = document.getElementById('fileInput');
+                    if (fileInput && fileInput.files[0]) {
+                        formData.append('arquivo', fileInput.files[0]);
+                        formData.append('fase', 'E2E');
+
+                        // Atualiza para Mobile Tests
+                        setAnalyses(prev => prev.map((a, idx) => ({
+                            ...a,
+                            status: idx <= 1 ? 'analyzing' : 'pending',
+                            progress: idx === 0 ? 100 : idx === 1 ? 50 : 0,
+                            details: idx === 0 ? 'Análise SAST concluída' : idx === 1 ? 'Executando testes mobile...' : a.details
+                        })));
+
+                        setLogs(prev => [...prev, {
+                            type: 'info',
+                            text: 'Executando testes dinâmicos...',
+                            time: new Date().toLocaleTimeString('pt-BR', { hour12: false })
+                        }]);
+
+                        const response = await fetch('/executar-teste-apk', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await response.json();
+                        const newTime = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+
+                        // Atualiza estatísticas com valores reais
+                        const statsResponse = await fetch('/api/stats');
+                        const statsData = await statsResponse.json();
+                        setStats(statsData);
+
+                        // Atualiza métricas de segurança
+                        const falhas = data.analise_estatica?.falhas_identificadas || [];
+                        const s1Count = falhas.filter(f => f.severidade === 'S1').length;
+                        const s2Count = falhas.filter(f => f.severidade === 'S2').length;
+
+                        setSecurityMetrics({
+                            vulnerabilities: s1Count,
+                            s1Defects: data.analise_dinamica?.defeitos_s1 || 0,
+                            s2Defects: data.analise_dinamica?.defeitos_s2 || 0,
+                            permissions: falhas.filter(f => f.tipo === 'PRIVACIDADE').length
+                        });
+
+                        // Log das falhas encontradas
+                        if (falhas.length > 0) {
+                            falhas.forEach(falha => {
+                                setLogs(prev => [...prev, {
+                                    type: falha.severidade === 'S1' ? 'error' : 'warning',
+                                    text: `[${falha.severidade}] ${falha.mensagem}`,
+                                    time: newTime
+                                }]);
+                            });
+                        }
+
+                        // Atualiza análises com status final real
+                        const finalStatus = data.status_final === 'APROVADO' ? 'approved' : 'rejected';
+                        setAnalyses(prev => prev.map((a, idx) => ({
+                            ...a,
+                            status: finalStatus,
+                            progress: 100,
+                            details: idx === 0
+                                ? `SAST: ${falhas.length} falhas encontradas`
+                                : idx === 1
+                                    ? `Testes: ${data.analise_dinamica?.aprovados || 0}/${data.analise_dinamica?.total_testes || 0} aprovados`
+                                    : `Quality Gate: ${data.status_final}`
+                        })));
+
+                        setLogs(prev => [...prev, {
+                            type: data.status_final === 'APROVADO' ? 'success' : 'error',
+                            text: `Análise finalizada: ${data.status_final}`,
+                            time: newTime
+                        }]);
+
+                        if (data.relatorio_pdf) {
+                            setLogs(prev => [...prev, {
+                                type: 'success',
+                                text: `Relatório PDF gerado: ${data.relatorio_pdf}`,
+                                time: newTime
+                            }]);
+                        }
+                    }
+                } catch (error) {
+                    const errorTime = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+                    setLogs(prev => [...prev, {
+                        type: 'error',
+                        text: `Erro na análise: ${error.message}`,
+                        time: errorTime
+                    }]);
+
+                    setAnalyses(prev => prev.map(a => ({
+                        ...a,
+                        status: 'rejected',
+                        details: 'Erro durante execução'
+                    })));
+                } finally {
+                    setIsAnalyzing(false);
+                }
+            };
+
+            return (
+                <>
+                    <header>
+                        <div className="header-content">
+                            <div className="brand">
+                                <div className="brand-icon">S</div>
+                                <div className="brand-text">
+                                    <h1>SURF APP TESTER</h1>
+                                    <p>Quality Gate Platform</p>
+                                </div>
+                            </div>
+                            <div className="header-actions">
+                                <div className="status-badge">
+                                    <div className="status-dot"></div>
+                                    <span>Active</span>
+                                </div>
+                                <button className="btn btn-secondary">
+                                    <span>⚙️</span> Config
+                                </button>
+                                <button className="btn btn-primary" onClick={handleRunAnalysis}>
+                                    <span>▶️</span> Run Analysis
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="main-content">
+                        <input 
+                            type="file" 
+                            id="fileInput" 
+                            accept=".apk" 
+                            style={{ display: 'none' }} 
+                            onChange={handleFileUpload}
+                        />
+                        <div className="upload-section" onClick={() => document.getElementById('fileInput').click()}>
+                            <div className="upload-icon">📱</div>
+                            <h3>Upload Android APK</h3>
+                            <p>Drop your APK file here or click to browse</p>
+                            {uploadedFile && (
+                                <p style={{ marginTop: '10px', fontWeight: '600' }}>
+                                    ✓ {uploadedFile}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="stats-grid">
+                            <div className="stat-card">
+                                <div className="stat-header">
+                                    <div className="stat-icon">🧪</div>
+                                </div>
+                                <div className="stat-value">{stats.testsRun}</div>
+                                <div className="stat-label">Testes Executados</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-header">
+                                    <div className="stat-icon">✅</div>
+                                </div>
+                                <div className="stat-value" style={{ color: '#10b981' }}>{stats.passed}</div>
+                                <div className="stat-label">Testes Aprovados</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-header">
+                                    <div className="stat-icon">❌</div>
+                                </div>
+                                <div className="stat-value" style={{ color: stats.failed > 0 ? '#ef4444' : '#10b981' }}>{stats.failed}</div>
+                                <div className="stat-label">Testes Falharam</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-header">
+                                    <div className="stat-icon">📊</div>
+                                </div>
+                                <div className="stat-value" style={{ color: stats.coverage >= 90 ? '#10b981' : stats.coverage >= 70 ? '#f59e0b' : '#ef4444' }}>{stats.coverage}%</div>
+                                <div className="stat-label">Taxa de Aprovacao</div>
+                            </div>
+                        </div>
+
+                        <div className="content-grid">
+                            <div className="content-left">
+                                <div className="section">
+                                    <div className="section-header">
+                                        <h2 className="section-title">
+                                            Analysis Pipeline
+                                            <span className="section-badge">3 services</span>
+                                        </h2>
+                                    </div>
+
+                                    {analyses.map(analysis => (
+                                        <div key={analysis.id} className="analysis-item">
+                                            <div className="analysis-header">
+                                                <span className="analysis-name">{analysis.name}</span>
+                                                <span className={`analysis-status status-${analysis.status}`}>
+                                                    {analysis.status}
+                                                </span>
+                                            </div>
+                                            <div className="analysis-details">
+                                                {analysis.details}
+                                            </div>
+                                            <div className="service-tag">
+                                                Service: {analysis.service}
+                                            </div>
+                                            <div className="progress-wrapper">
+                                                <div className="progress-bar">
+                                                    <div 
+                                                        className="progress-fill" 
+                                                        style={{ width: `${analysis.progress}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="progress-text">{Math.round(analysis.progress)}%</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="section">
+                                    <div className="section-header">
+                                        <h2 className="section-title">Security Metrics</h2>
+                                    </div>
+                                    <div className="metrics-grid">
+                                        <div className="metric-item">
+                                            <div className="metric-label">Vulnerabilities (S1)</div>
+                                            <div className="metric-value" style={{ color: securityMetrics.vulnerabilities > 0 ? '#ef4444' : '#10b981' }}>
+                                                {securityMetrics.vulnerabilities}
+                                            </div>
+                                        </div>
+                                        <div className="metric-item">
+                                            <div className="metric-label">Defeitos S1</div>
+                                            <div className="metric-value" style={{ color: securityMetrics.s1Defects > 0 ? '#ef4444' : '#10b981' }}>
+                                                {securityMetrics.s1Defects}
+                                            </div>
+                                        </div>
+                                        <div className="metric-item">
+                                            <div className="metric-label">Defeitos S2</div>
+                                            <div className="metric-value" style={{ color: securityMetrics.s2Defects > 5 ? '#f59e0b' : '#10b981' }}>
+                                                {securityMetrics.s2Defects}
+                                            </div>
+                                        </div>
+                                        <div className="metric-item">
+                                            <div className="metric-label">Permissions Issues</div>
+                                            <div className="metric-value">{securityMetrics.permissions}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="content-right">
+                                <div className="section">
+                                    <div className="section-header">
+                                        <h2 className="section-title">Console Logs</h2>
+                                    </div>
+                                    <div className="terminal">
+                                        {logs.map((log, i) => (
+                                            <div key={i} className={`terminal-line ${log.type}`}>
+                                                <span className="terminal-timestamp">[{log.time}]</span>
+                                                <span className="terminal-content">{log.text}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

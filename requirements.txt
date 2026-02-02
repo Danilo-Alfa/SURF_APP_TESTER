@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+reportlab
+gitpython
+pytest
+androguard
+python-multipart
+Appium-Python-Client
