@@ -1,9 +1,7 @@
 fastapi
 uvicorn
-pydantic
-reportlab
-gitpython
-pytest
-androguard
 python-multipart
+androguard
+pytest
+reportlab
 Appium-Python-Client
