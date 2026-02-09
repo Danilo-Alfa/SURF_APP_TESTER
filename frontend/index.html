@@ -36,8 +36,10 @@
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg-primary);
+            background-image: linear-gradient(to bottom, #f0f9ff 0%, #e0f2fe 100%);
             color: var(--text-primary);
             line-height: 1.6;
+            min-height: 100vh;
         }
 
         @keyframes slideInDown {
@@ -109,6 +111,7 @@
             height: 40px;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border-radius: 10px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -908,8 +911,10 @@
                         <div className="header-content">
                             <div className="brand">
                                 <div className="brand-icon">S</div>
+                                <div className="brand-icon">🏄</div>
                                 <div className="brand-text">
                                     <h1>SURF APP TESTER</h1>
+                                    <h1>SURF APP TESTER 🌊</h1>
                                     <p>Plataforma de Quality Gate</p>
                                 </div>
                             </div>
@@ -980,6 +985,9 @@
                                     <div className="upload-icon">📱</div>
                                     <h3>Enviar APK Android</h3>
                                     <p>Arraste seu arquivo APK aqui</p>
+                                    <div className="upload-icon">🏄‍♂️</div>
+                                    <h3>Enviar APK (Sua Prancha)</h3>
+                                    <p>Arraste seu arquivo APK para surfar nos testes</p>
                                     {uploadedFile && (
                                         <p style={{ marginTop: '10px', fontWeight: '600' }}>
                                             ✓ {uploadedFile}
@@ -998,6 +1006,7 @@
                                 />
                                 <div className="upload-section" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }} onClick={() => document.getElementById('codeInput').click()}>
                                     <div className="upload-icon">💻</div>
+                                    <div className="upload-icon">🌊</div>
                                     <h3>Enviar Código Fonte</h3>
                                     <p>Opcional: Enviar .zip do código fonte</p>
                                     {uploadedCode && (
