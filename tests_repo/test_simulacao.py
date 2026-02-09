@@ -25,12 +25,8 @@ def apk_analisado():
     if not caminho or not os.path.exists(caminho):
         return None
     
-    # Configura a semente aleatória baseada no tamanho do arquivo
-    # Assim, o mesmo APK sempre terá os mesmos resultados "simulados"
-    try:
-        random.seed(os.path.getsize(caminho))
-    except:
-        random.seed(12345)
+    # Configura a semente aleatória com o tempo atual para variar os resultados
+    random.seed(time.time())
     
     try:
         # Carrega o APK REAL para análise

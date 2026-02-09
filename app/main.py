@@ -2,6 +2,7 @@
 import shutil
 import os
 import socket
+import time
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -261,7 +262,7 @@ def upload_e_testar(
         },
         "analise_dinamica": resultados_testes,
         "status_final": "APROVADO" if aprovado else "REPROVADO",
-        "relatorio_pdf": pdf,
+        "relatorio_pdf": f"{pdf}?t={int(time.time())}" if pdf else None,
         "modo_execucao": modo_execucao
     }
 

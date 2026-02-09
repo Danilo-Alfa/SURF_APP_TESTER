@@ -7,7 +7,7 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,30 +16,35 @@
         }
 
         :root {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #f1f5f9;
+            --bg-primary: #fdfbf7; /* Areia muito suave */
+            --bg-secondary: rgba(255, 255, 255, 0.95);
+            --bg-tertiary: #f0f9ff;
             --bg-card: #ffffff;
-            --accent-primary: #0ea5e9;
-            --accent-secondary: #06b6d4;
+            --accent-primary: #00838f; /* Azul Oceano Profundo */
+            --accent-secondary: #4dd0e1; /* Turquesa */
             --accent-success: #10b981;
             --accent-danger: #ef4444;
             --accent-warning: #f59e0b;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
+            --text-primary: #263238;
+            --text-secondary: #546e7a;
             --text-muted: #94a3b8;
-            --border: #e2e8f0;
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --border: #eceff1;
+            --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg-primary);
-            background-image: linear-gradient(to bottom, #f0f9ff 0%, #e0f2fe 100%);
+            background-image: linear-gradient(180deg, #e0f7fa 0%, #fff8e1 100%); /* Céu para Areia */
+            background-attachment: fixed;
             color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Poppins', sans-serif;
         }
 
         @keyframes slideInDown {
@@ -81,8 +86,9 @@
 
         /* Header */
         header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
             padding: 20px 24px;
             animation: slideInDown 0.5s ease-out;
             position: sticky;
@@ -118,19 +124,20 @@
             font-size: 20px;
             font-weight: 800;
             color: white;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 131, 143, 0.3);
         }
 
         .brand-text h1 {
             font-size: 20px;
             font-weight: 800;
-            color: var(--text-primary);
+            color: var(--accent-primary);
             letter-spacing: -0.5px;
+            text-shadow: none;
         }
 
         .brand-text p {
             font-size: 11px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -165,37 +172,40 @@
         .btn {
             padding: 10px 18px;
             border: none;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
+            border-radius: 50px; /* Pílula */
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
             color: white;
-            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 131, 143, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 131, 143, 0.4);
         }
 
         .btn-secondary {
             background: white;
             color: var(--text-primary);
             border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
 
         .btn-secondary:hover {
             border-color: var(--accent-primary);
-            background: var(--bg-tertiary);
+            color: var(--accent-primary);
         }
 
         /* Main Content */
@@ -207,35 +217,40 @@
 
         /* Upload Section */
         .upload-section {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px dashed #b0bec5;
+            border-radius: 24px;
             padding: 40px;
             text-align: center;
             margin-bottom: 24px;
             cursor: pointer;
             transition: all 0.3s ease;
             animation: slideInUp 0.5s ease-out;
-            color: white;
+            color: var(--text-primary);
         }
 
         .upload-section:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: var(--accent-secondary);
+            box-shadow: 0 10px 30px rgba(77, 208, 225, 0.2);
         }
 
         .upload-icon {
-            font-size: 48px;
+            font-size: 72px;
             margin-bottom: 12px;
+            filter: none;
         }
 
         .upload-section h3 {
             font-size: 22px;
             font-weight: 700;
             margin-bottom: 6px;
+            color: var(--accent-primary);
         }
 
         .upload-section p {
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-secondary);
             font-size: 14px;
         }
 
@@ -249,9 +264,9 @@
         }
 
         .stat-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--bg-card);
+            border: none;
+            border-radius: 20px;
             padding: 20px;
             transition: all 0.3s ease;
             box-shadow: var(--shadow);
@@ -311,9 +326,9 @@
         }
 
         .section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--bg-card);
+            border: none;
+            border-radius: 20px;
             padding: 24px;
             margin-bottom: 24px;
             box-shadow: var(--shadow);
@@ -451,10 +466,19 @@
         }
 
         .metric-item {
-            background: var(--bg-tertiary);
-            border-radius: 10px;
-            padding: 16px;
-            border: 1px solid var(--border);
+            background: linear-gradient(135deg, #ffffff 0%, #e0f7fa 100%);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(0, 131, 143, 0.08);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .metric-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 131, 143, 0.15);
         }
 
         .metric-label {
@@ -472,14 +496,16 @@
 
         /* Terminal */
         .terminal {
-            background: #1e293b;
-            border-radius: 10px;
+            background: #0f172a; /* Noite no mar */
+            border-radius: 16px;
             padding: 16px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
             max-height: 400px;
             overflow-y: auto;
             line-height: 1.7;
+            border: 1px solid #334155;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
         }
 
         .terminal-line {
@@ -689,6 +715,10 @@
                 const file = event.target.files?.[0];
                 if (!file) return;
 
+                // Feedback imediato: Mostra o GIF assim que o arquivo é selecionado
+                setUploadedFile(file.name);
+                setFileObj(file);
+
                 const time = new Date().toLocaleTimeString('pt-BR', { hour12: false });
                 
                 try {
@@ -709,8 +739,6 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        setUploadedFile(file.name);
-                        setFileObj(file); // Salva o arquivo para uso posterior
                         setLogs(prev => [...prev, { 
                             type: 'success', 
                             text: `APK enviado: ${file.name} (${data.size})`, 
@@ -910,11 +938,9 @@
                     <header>
                         <div className="header-content">
                             <div className="brand">
-                                <div className="brand-icon">S</div>
                                 <div className="brand-icon">🏄</div>
                                 <div className="brand-text">
                                     <h1>SURF APP TESTER</h1>
-                                    <h1>SURF APP TESTER 🌊</h1>
                                     <p>Plataforma de Quality Gate</p>
                                 </div>
                             </div>
@@ -982,16 +1008,15 @@
                                     onChange={handleFileUpload}
                                 />
                                 <div className="upload-section" onClick={() => document.getElementById('fileInput').click()}>
-                                    <div className="upload-icon">📱</div>
-                                    <h3>Enviar APK Android</h3>
-                                    <p>Arraste seu arquivo APK aqui</p>
                                     <div className="upload-icon">🏄‍♂️</div>
-                                    <h3>Enviar APK (Sua Prancha)</h3>
-                                    <p>Arraste seu arquivo APK para surfar nos testes</p>
+                                    <h3>Pegue sua Prancha (APK)</h3>
+                                    <p>Arraste o arquivo para pegar essa onda de testes</p>
                                     {uploadedFile && (
-                                        <p style={{ marginTop: '10px', fontWeight: '600' }}>
-                                            ✓ {uploadedFile}
-                                        </p>
+                                        <div style={{ marginTop: '20px', animation: 'slideInUp 0.5s ease-out' }}>
+                                            <p style={{ marginBottom: '12px', fontWeight: '700', color: 'var(--accent-primary)' }}>
+                                                ✓ {uploadedFile}
+                                            </p>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -1004,11 +1029,10 @@
                                     style={{ display: 'none' }} 
                                     onChange={handleCodeUpload}
                                 />
-                                <div className="upload-section" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }} onClick={() => document.getElementById('codeInput').click()}>
-                                    <div className="upload-icon">💻</div>
+                                <div className="upload-section" onClick={() => document.getElementById('codeInput').click()}>
                                     <div className="upload-icon">🌊</div>
-                                    <h3>Enviar Código Fonte</h3>
-                                    <p>Opcional: Enviar .zip do código fonte</p>
+                                    <h3>Upload do Código Fonte</h3>
+                                    <p>Envie o arquivo .zip para análise no fundo do mar</p>
                                     {uploadedCode && (
                                         <p style={{ marginTop: '10px', fontWeight: '600' }}>
                                             ✓ {uploadedCode}
@@ -1050,32 +1074,32 @@
 
                         <div className="stats-grid">
                             <div className="stat-card">
-                                <div className="stat-header">
-                                    <div className="stat-icon">🧪</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                                    <div className="stat-icon">📊</div>
+                                    <div className="stat-label" style={{ margin: 0 }}>Testes Executados</div>
                                 </div>
                                 <div className="stat-value">{stats.testsRun}</div>
-                                <div className="stat-label">Testes Executados</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-header">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                                     <div className="stat-icon">✅</div>
+                                    <div className="stat-label" style={{ margin: 0 }}>Testes Aprovados</div>
                                 </div>
                                 <div className="stat-value" style={{ color: '#10b981' }}>{stats.passed}</div>
-                                <div className="stat-label">Testes Aprovados</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-header">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                                     <div className="stat-icon">❌</div>
+                                    <div className="stat-label" style={{ margin: 0 }}>Falhas Detectadas</div>
                                 </div>
                                 <div className="stat-value" style={{ color: stats.failed > 0 ? '#ef4444' : '#10b981' }}>{stats.failed}</div>
-                                <div className="stat-label">Testes Falharam</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-header">
-                                    <div className="stat-icon">📊</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                                    <div className="stat-icon">📈</div>
+                                    <div className="stat-label" style={{ margin: 0 }}>Taxa de Aprovação</div>
                                 </div>
                                 <div className="stat-value" style={{ color: stats.coverage >= 90 ? '#10b981' : stats.coverage >= 70 ? '#f59e0b' : '#ef4444' }}>{stats.coverage}%</div>
-                                <div className="stat-label">Taxa de Aprovação</div>
                             </div>
                         </div>
 
@@ -1189,7 +1213,9 @@
                             <div className="content-right">
                                 <div className="section">
                                     <div className="section-header">
-                                        <h2 className="section-title">Logs do Console</h2>
+                                        <h2 className="section-title">
+                                            Logs do Console
+                                        </h2>
                                     </div>
                                     <div className="terminal">
                                         {logs.map((log, i) => (
