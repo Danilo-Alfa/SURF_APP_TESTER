@@ -40,6 +40,11 @@ app.add_middleware(
 # Servir arquivos estáticos do frontend
 if os.path.exists("frontend"):
     app.mount("/static", StaticFiles(directory="frontend"), name="static")
+frontend_dir = "frontend/build" if os.path.exists("frontend/build") else "frontend"
+
+if os.path.exists(frontend_dir):
+    # Monta os arquivos estáticos (JS, CSS, Imagens)
+    app.mount("/static", StaticFiles(directory=f"{frontend_dir}/static" if os.path.exists(f"{frontend_dir}/static") else frontend_dir), name="static")
 
 # Servir arquivos gerados (PDFs) da pasta storage
 os.makedirs("storage", exist_ok=True)
@@ -52,6 +57,13 @@ async def read_root():
     frontend_path = "frontend/index.html"
     if os.path.exists(frontend_path):
         return FileResponse(frontend_path)
+    # Tenta servir do build primeiro, senão tenta do fonte direto
+    possible_paths = ["frontend/build/index.html", "frontend/index.html"]
+    
+    for path in possible_paths:
+        if os.path.exists(path):
+            return FileResponse(path)
+            
     return {"message": "Front-end não encontrado. Crie a pasta 'frontend' e adicione o index.html"}
 
 # Nova rota para obter status do sistema
@@ -365,6 +377,27 @@ async def get_last_analysis():
 # Bloco para iniciar via 'python -m app.main'
 if __name__ == "__main__":
     import uvicorn
+    
+    # Verificação rápida: Alerta se o ambiente Android não estiver configurado
+    android_home = os.getenv("ANDROID_HOME")
+    if not android_home:
+        # Tenta localizar automaticamente no caminho padrão do Windows
+        local_app_data = os.environ.get("LOCALAPPDATA", "")
+        default_sdk = os.path.join(local_app_data, "Android", "Sdk")
+        
+        if local_app_data and os.path.exists(default_sdk):
+            print(f"\n⚠️  AVISO: SDK encontrado em '{default_sdk}', mas ANDROID_HOME não está definido.")
+            print(f"   👉 Execute no PowerShell: $env:ANDROID_HOME = \"{default_sdk}\"")
+            print("   👉 Depois reinicie o Appium e esta aplicação.\n")
+        else:
+            print("\n⚠️  AVISO: Ambiente Android (SDK) não detectado.")
+            print("   👉 O sistema rodará em modo 'ANÁLISE ESTÁTICA' (apenas verificação de código).")
+            print("   👉 Para testes em celular físico, o Android SDK é obrigatório.\n")
+    elif not os.path.exists(android_home):
+        print(f"\n⚠️  AVISO CRÍTICO: O caminho definido em ANDROID_HOME não existe!")
+        print(f"   Caminho atual: {android_home}")
+        print("   Certifique-se de que o Android Studio está instalado e o caminho está correto.\n")
+
     print("🚀 Iniciando Surf App Tester Platform...")
     print("📱 Front-end disponível em: http://localhost:8000")
     print("📚 API docs disponível em: http://localhost:8000/docs")

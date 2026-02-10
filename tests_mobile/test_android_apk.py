@@ -50,6 +50,15 @@ def driver():
         print(f"📱 Dispositivo Vinculado: {device_name} (Android {caps.get('platformVersion', '?')})")
         
     except Exception as e:
+        # Tratamento específico para erro de configuração do ambiente Android
+        error_msg = str(e)
+        if "ANDROID_HOME" in error_msg or "ANDROID_SDK_ROOT" in error_msg or "Android SDK root folder" in error_msg:
+            pytest.fail(f"ERRO DE CONFIGURAÇÃO: O Appium não encontrou a pasta do Android SDK.\n"
+                        f"O caminho que ele tentou usar não existe.\n"
+                        f"1. Abra o Android Studio > Settings > Android SDK e copie o 'Android SDK Location'.\n"
+                        f"2. No terminal do Appium, pare e rode: $env:ANDROID_HOME = \"CAMINHO_COPIADO\"\n"
+                        f"Erro original: {error_msg}")
+
         pytest.fail(f"FALHA DE CONEXÃO: Não foi possível falar com o celular. \n"
                     f"1. Verifique o cabo USB.\n"
                     f"2. Verifique se a Depuração USB está ligada.\n"
