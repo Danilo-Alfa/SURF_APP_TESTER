@@ -38,7 +38,8 @@ class TestRunner:
             "total_testes": 0, "executados": 0, "aprovados": 0, "falhas": 0,
             "defeitos_s1": 0, "defeitos_s2": 0, "falhas_por_area": {},
             "lista_falhas": [], # Lista detalhada para o PDF
-            "lista_testes": []  # Lista completa para o Frontend
+            "lista_testes": [],  # Lista completa para o Frontend
+            "sugestao_ia": None # Campo para IA preencher
         }
         
         if not os.path.exists(caminho_xml):
@@ -83,14 +84,16 @@ class TestRunner:
                         status = "REPROVADO"
                         msg = elem.attrib.get("message", "Erro sem mensagem")
                         detalhes = elem.text or ""
-                        severidade = "S1" if "S1" in nome or "S1" in msg else "S2"
+                        severidade = "S1" if "[S1]" in msg or "S1" in nome else ("S2" if "[S2]" in msg else "S3")
                         
                         if severidade == "S1": resultados["defeitos_s1"] += 1
-                        else: resultados["defeitos_s2"] += 1
+                        elif severidade == "S2": resultados["defeitos_s2"] += 1
                         
                         resultados["lista_falhas"].append({
                             "teste": nome, "classe": classe, "mensagem": msg,
-                            "severidade": severidade, "detalhes": detalhes.strip()
+                            "severidade": severidade, "detalhes": detalhes.strip(),
+                            "descricao": descricao, # Adicionado para o relatório executivo
+                            "analise_ia": "Aguardando integração com LLM..." # Placeholder
                         })
                     
                     # Adiciona à lista completa de testes para o front
@@ -105,6 +108,31 @@ class TestRunner:
             
             resultados["executados"] = resultados["total_testes"]
             resultados["aprovados"] = resultados["total_testes"] - resultados["falhas"]
+
+            # Simulação de uma IA analisando o contexto geral (Futuro: Chamar API OpenAI/Gemini aqui)
+            if resultados["falhas"] > 0:
+                # Lógica Dinâmica: Gera o texto baseado nas falhas REAIS encontradas
+                topicos = []
+                for f in resultados["lista_falhas"]:
+                    m = f['mensagem'].lower()
+                    if "debug" in m: topicos.append("Segurança Crítica (Debug Ativo)")
+                    elif "assinatura" in m: topicos.append("Integridade do APK (Não assinado)")
+                    elif "backup" in m: topicos.append("Proteção de Dados (Backup Aberto)")
+                    elif "export" in m: topicos.append("Superfície de Ataque (Activities Expostas)")
+                    elif "performance" in m or "frames" in m: topicos.append("Performance (Jank/Lentidão)")
+                
+                # Remove duplicatas e pega os top 3
+                topicos = list(set(topicos))[:3]
+                resumo_falhas = ", ".join(topicos)
+                
+                resultados["sugestao_ia"] = (
+                    f"<b>Analise Inteligente:</b> O Quality Gate reprovou o build principalmente devido a: <b>{resumo_falhas}</b>. "
+                    "Recomendamos priorizar as falhas marcadas como [S1] pois bloqueiam o lançamento na loja. "
+                    "Verifique o Manifesto Android para fechar as brechas de segurança identificadas."
+                )
+            else:
+                resultados["sugestao_ia"] = "<b>Analise Inteligente:</b> Parabens! O build passou em todos os criterios de qualidade e seguranca. Pronto para UAT."
+
         except Exception as e:
             print(f"Erro ao analisar XML: {e}")
             

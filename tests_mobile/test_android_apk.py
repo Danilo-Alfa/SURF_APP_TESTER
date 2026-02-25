@@ -2,9 +2,19 @@
 import pytest
 import os
 import time
+import subprocess
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
+
+# Tenta importar androguard para limpeza prévia (evita erro INSTALL_FAILED_UPDATE_INCOMPATIBLE)
+try:
+    from androguard.core.apk import APK
+except ImportError:
+    try:
+        from androguard.core.bytecodes.apk import APK
+    except ImportError:
+        APK = None
 
 # Usamos scope="module" para abrir o app uma vez e rodar vários testes na mesma sessão
 @pytest.fixture(scope="module")
@@ -33,10 +43,62 @@ def driver():
     options.auto_grant_permissions = True
     
     # Aumenta o tempo limite de instalação (Celulares físicos as vezes demoram mais que emuladores)
-    options.new_command_timeout = 300
+    options.new_command_timeout = 600
     options.set_capability("appium:uiautomator2ServerInstallTimeout", 90000)
+    options.set_capability("appium:adbExecTimeout", 60000) # Dá mais tempo para comandos ADB
+    options.set_capability("appium:enforceAppInstall", True) # Força o Appium a tentar instalar
+
+    # --- RESOLUÇÃO DO COMANDO ADB ---
+    # Tenta encontrar o ADB pelo ANDROID_HOME se não estiver no PATH global
+    adb_cmd = "adb"
+    android_home = os.getenv("ANDROID_HOME")
+    if android_home:
+        potential_adb = os.path.join(android_home, "platform-tools", "adb.exe")
+        if os.path.exists(potential_adb):
+            adb_cmd = f'"{potential_adb}"'
 
     print(f"--- Tentando conectar ao Appium (http://localhost:4723) para testar: {apk_path} ---")
+    
+    # --- DIAGNÓSTICO PRÉVIO (FORÇA BRUTA) ---
+    # Isso garante que sabemos POR QUE a instalação falha antes mesmo do Appium tentar
+    print("🔍 Diagnóstico: Verificando conexão ADB e tentando instalação manual...")
+    try:
+        # 1. Verifica se tem device
+        chk = subprocess.run(f"{adb_cmd} devices", shell=True, capture_output=True, text=True)
+        if "device" not in chk.stdout.replace("List of devices attached", "").strip():
+             pytest.fail("❌ ERRO FATAL: Nenhum celular detectado pelo ADB. Verifique o cabo USB e a Depuração USB.")
+
+        # 1.5 Tenta desinstalar versão anterior para evitar conflito de assinatura
+        if APK:
+            try:
+                apk_obj = APK(apk_path)
+                pkg_name = apk_obj.get_package()
+                print(f"🗑️ Tentando desinstalar versão antiga de: {pkg_name}")
+                subprocess.run(f"{adb_cmd} uninstall {pkg_name}", shell=True, capture_output=True)
+            except Exception as e:
+                print(f"⚠️ Aviso: Falha ao tentar desinstalar versão anterior (pode ser ignorado): {e}")
+        else:
+            print("⚠️ Aviso: Biblioteca 'androguard' não detectada. A desinstalação automática da versão antiga foi pulada.")
+
+        # 2. Tenta instalar via comando direto (mostra o erro real do Android)
+        # flags: -r (reinstall), -g (grant permissions), -t (allow test packages), -d (allow downgrade)
+        print(f"📦 Tentando instalar APK via ADB: {apk_path}")
+        subprocess.run(f'{adb_cmd} install -r -g -t -d "{apk_path}"', shell=True, check=True, capture_output=True, text=True)
+        print("✅ APK instalado com sucesso via ADB! Iniciando automação...")
+    except subprocess.CalledProcessError as e:
+        erro_msg = e.stderr if e.stderr else e.stdout
+        print(f"❌ O ANDROID RECUSOU O APK. Motivo:\n{erro_msg}")
+        
+        dica = ""
+        if "INSTALL_FAILED_UPDATE_INCOMPATIBLE" in erro_msg:
+            dica = "\n💡 DICA: O app já está instalado com outra assinatura. Desinstale-o manualmente do celular e tente de novo."
+        elif "INSTALL_FAILED_USER_RESTRICTED" in erro_msg:
+            dica = "\n💡 DICA (Xiaomi/Redmi): Você precisa ativar 'Instalar via USB' nas Opções do Desenvolvedor (requer chip SIM)."
+        elif "INSTALL_PARSE_FAILED_NO_CERTIFICATES" in erro_msg:
+            dica = "\n💡 DICA: O APK não está assinado. Gere uma build assinada (Signed APK)."
+            
+        pytest.fail(f"Falha na instalação do APK: {erro_msg}{dica}")
+    # -----------------------------------------
     
     driver = None
     try:

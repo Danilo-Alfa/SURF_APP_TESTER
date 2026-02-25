@@ -41,7 +41,7 @@ class ApkAnalyzer:
         
         # VERIFICAÇÃO 1: Debuggable
         try:
-            if apk.is_debuggable():
+            if apk.get_application_attribute("debuggable") == "true":
                 relatorio_tecnico["falhas_encontradas"].append({
                     "tipo": "SEGURANÇA",
                     "severidade": "S1",

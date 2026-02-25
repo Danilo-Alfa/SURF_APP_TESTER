@@ -106,177 +106,192 @@ def upload_e_testar(
     global latest_results
     latest_results["analysis_in_progress"] = True
     latest_results["current_stage"] = "SAST"
+    
+    try:
 
-    # 1. SALVAR O APK
-    # Melhoria: Limpar storage antigo de APKs para economizar espaço, mantendo a pasta
-    storage_dir = "storage"
-    os.makedirs(storage_dir, exist_ok=True)
-    
-    # Remove APKs antigos para evitar confusão
-    for f in os.listdir(storage_dir):
-        if f.endswith(".apk") or f.endswith(".zip"):
-            try: os.remove(os.path.join(storage_dir, f))
-            except: pass
-            
-    caminho_apk = None
-    if arquivo:
-        caminho_apk = os.path.join("storage", arquivo.filename)
-        with open(caminho_apk, "wb") as buffer:
-            shutil.copyfileobj(arquivo.file, buffer)
-        print(f"APK recebido e salvo em: {caminho_apk}")
-    else:
-        print("Nenhum APK enviado. Pulando análise de binário.")
-    
-    # 1.1 SALVAR CÓDIGO FONTE (SE HOUVER)
-    resultado_source = {"falhas_encontradas": []}
-    if codigo:
-        caminho_codigo = os.path.join("storage", codigo.filename)
-        with open(caminho_codigo, "wb") as buffer:
-            shutil.copyfileobj(codigo.file, buffer)
-        print(f"Código fonte recebido e salvo em: {caminho_codigo}")
+        # 1. SALVAR O APK
+        # Melhoria: Limpar storage antigo de APKs para economizar espaço, mantendo a pasta
+        storage_dir = "storage"
+        os.makedirs(storage_dir, exist_ok=True)
         
-        # Executa análise do ZIP
-        print("Iniciando varredura do Código Fonte...")
-        resultado_source = ApkAnalyzer.analisar_source_code(caminho_codigo)
-
-    # --- NOVA ETAPA: ANÁLISE ESTÁTICA DO CÓDIGO (SAST) ---
-    print("Iniciando Análise de Código e Segurança...")
-    latest_results["current_stage"] = "SAST_RUNNING"
-    
-    resultado_codigo = {"falhas_encontradas": []}
-    if caminho_apk:
-        resultado_codigo = ApkAnalyzer.analisar_codigo(caminho_apk)
-
-    # Extrai falhas do código para somar no Quality Gate
-    # Junta falhas do APK (Engenharia Reversa) + Falhas do ZIP (Código Fonte)
-    falhas_apk = resultado_codigo.get("falhas_encontradas", [])
-    falhas_source = resultado_source.get("falhas_encontradas", [])
-    falhas_codigo = falhas_apk + falhas_source
-    
-    s1_codigo = sum(1 for f in falhas_codigo if f['severidade'] == 'S1')
-    s2_codigo = sum(1 for f in falhas_codigo if f['severidade'] == 'S2')
-
-    print(f"Análise de Código concluída. S1: {s1_codigo}, S2: {s2_codigo}")
-
-    # 2. CONFIGURAR AMBIENTE E RODAR TESTES DINÂMICOS (DAST)
-    latest_results["current_stage"] = "DAST"
-    
-    resultados_testes = {
-        "total_testes": 0, "executados": 0, "aprovados": 0,
-        "defeitos_s1": 0, "defeitos_s2": 0, "falhas_por_area": {},
-        "lista_testes": []
-    }
-    modo_execucao = "APENAS_CODIGO_FONTE"
-
-    if caminho_apk:
-        os.environ["TARGET_APK_PATH"] = os.path.abspath(caminho_apk)
+        # Remove APKs antigos para evitar confusão
+        for f in os.listdir(storage_dir):
+            if f.endswith(".apk") or f.endswith(".zip"):
+                try: os.remove(os.path.join(storage_dir, f))
+                except: pass
+                
+        caminho_apk = None
+        if arquivo:
+            caminho_apk = os.path.join("storage", arquivo.filename)
+            with open(caminho_apk, "wb") as buffer:
+                shutil.copyfileobj(arquivo.file, buffer)
+            print(f"APK recebido e salvo em: {caminho_apk}")
+        else:
+            print("Nenhum APK enviado. Pulando análise de binário.")
         
-        # Tenta rodar testes mobile reais (Appium) primeiro
-        caminho_testes = "tests_mobile"
-        modo_execucao = "REAL_DEVICE"
-
-        print(f"Tentando executar testes em: {caminho_testes}")
-        try:
-            # Verifica se o Appium está rodando antes de tentar testar
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(0.5)
-            if sock.connect_ex(('localhost', 4723)) != 0:
-                sock.close()
-                raise Exception("Servidor Appium não detectado na porta 4723.")
-            sock.close()
-
-            # Rodamos o TestRunner
-            resultados_testes = TestRunner.executar_testes(caminho_testes)
+        # 1.1 SALVAR CÓDIGO FONTE (SE HOUVER)
+        resultado_source = {"falhas_encontradas": []}
+        if codigo:
+            caminho_codigo = os.path.join("storage", codigo.filename)
+            with open(caminho_codigo, "wb") as buffer:
+                shutil.copyfileobj(codigo.file, buffer)
+            print(f"Código fonte recebido e salvo em: {caminho_codigo}")
             
-            # Se não retornou nada ou zero testes, assume falha de conexão com Appium
-            if not resultados_testes or resultados_testes.get('total_testes', 0) == 0:
-                raise Exception("Falha de conexão com Appium ou nenhum teste encontrado.")
-                
-            # Se rodou mas TUDO falhou (0 aprovados), assume erro de ambiente (ex: Appium travado)
-            # e força o fallback para Simulação para o usuário ver o fluxo funcionar.
-            if resultados_testes.get('aprovados', 0) == 0:
-                raise Exception("Todos os testes mobile falharam (provável erro de conexão).")
-                
-        except Exception as e:
-            print(f"⚠️ Ambiente mobile indisponível: {e}")
-            print("ℹ️ Executando Análise Estática Avançada (Verificação estrutural e de segurança).")
-            caminho_testes = "tests_repo"
-            modo_execucao = "ANALISE_ESTATICA"
-            resultados_testes = TestRunner.executar_testes(caminho_testes)
+            # Executa análise do ZIP
+            print("Iniciando varredura do Código Fonte...")
+            resultado_source = ApkAnalyzer.analisar_source_code(caminho_codigo)
 
-    if not resultados_testes:
-        # Fallback se o teste falhar em gerar XML
+        # --- NOVA ETAPA: ANÁLISE ESTÁTICA DO CÓDIGO (SAST) ---
+        print("Iniciando Análise de Código e Segurança...")
+        latest_results["current_stage"] = "SAST_RUNNING"
+        
+        resultado_codigo = {"falhas_encontradas": []}
+        if caminho_apk:
+            resultado_codigo = ApkAnalyzer.analisar_codigo(caminho_apk)
+
+        # Extrai falhas do código para somar no Quality Gate
+        # Junta falhas do APK (Engenharia Reversa) + Falhas do ZIP (Código Fonte)
+        falhas_apk = resultado_codigo.get("falhas_encontradas", [])
+        falhas_source = resultado_source.get("falhas_encontradas", [])
+        falhas_codigo = falhas_apk + falhas_source
+        
+        s1_codigo = sum(1 for f in falhas_codigo if f['severidade'] == 'S1')
+        s2_codigo = sum(1 for f in falhas_codigo if f['severidade'] == 'S2')
+
+        print(f"Análise de Código concluída. S1: {s1_codigo}, S2: {s2_codigo}")
+
+        # 2. CONFIGURAR AMBIENTE E RODAR TESTES DINÂMICOS (DAST)
+        latest_results["current_stage"] = "DAST"
+        
         resultados_testes = {
             "total_testes": 0, "executados": 0, "aprovados": 0,
             "defeitos_s1": 0, "defeitos_s2": 0, "falhas_por_area": {},
             "lista_testes": []
         }
+        modo_execucao = "APENAS_CODIGO_FONTE"
 
-    # 3. UNIFICAR OS RESULTADOS (CÓDIGO + TESTES)
-    total_s1 = resultados_testes['defeitos_s1'] + s1_codigo
-    total_s2 = resultados_testes['defeitos_s2'] + s2_codigo
+        if caminho_apk:
+            os.environ["TARGET_APK_PATH"] = os.path.abspath(caminho_apk)
+            
+            # Tenta rodar testes mobile reais (Appium) primeiro
+            caminho_testes = "tests_mobile"
+            modo_execucao = "REAL_DEVICE"
 
-    # Adiciona as falhas de código na lista de "motivos" do Quality Gate
-    motivos_codigo = [f"[CÓDIGO] {f['mensagem']}" for f in falhas_codigo]
+            print(f"Tentando executar testes em: {caminho_testes}")
+            try:
+                # Verifica se o Appium está rodando antes de tentar testar
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(2.0) # Aumentado timeout para evitar falsos negativos
+                if sock.connect_ex(('localhost', 4723)) != 0:
+                    sock.close()
+                    raise Exception("Servidor Appium não detectado na porta 4723.")
+                sock.close()
 
-    # 4. QUALITY GATE & RELATÓRIO
-    latest_results["current_stage"] = "QUALITY_GATE"
-    aprovado, motivos_gate = QualityGateEvaluator.avaliar_e2e_para_uat(
-        resultados_testes['total_testes'],
-        resultados_testes['executados'],
-        resultados_testes['aprovados'],
-        total_s1, # Soma total de defeitos críticos
-        total_s2,
-        resultados_testes['falhas_por_area']
-    )
+                # Rodamos o TestRunner
+                resultados_testes = TestRunner.executar_testes(caminho_testes)
+                
+                # Se não retornou nada ou zero testes, assume falha de conexão com Appium
+                if not resultados_testes or resultados_testes.get('total_testes', 0) == 0:
+                    raise Exception("Falha de conexão com Appium ou nenhum teste encontrado.")
+                    
+                # Se rodou mas TUDO falhou (0 aprovados), assume erro de ambiente (ex: Appium travado)
+                # e força o fallback para Simulação para o usuário ver o fluxo funcionar.
+                if resultados_testes.get('aprovados', 0) == 0:
+                    raise Exception("Todos os testes mobile falharam (provável erro de conexão).")
+                    
+            except Exception as e:
+                print(f"⚠️ Ambiente mobile indisponível: {e}")
+                print("ℹ️ Executando Análise Estática Avançada (Verificação estrutural e de segurança).")
+                caminho_testes = "tests_repo"
+                modo_execucao = "ANALISE_ESTATICA"
+                resultados_testes = TestRunner.executar_testes(caminho_testes)
 
-    # Junta todos os motivos
-    todos_motivos = motivos_codigo + motivos_gate
+        if not resultados_testes:
+            # Fallback se o teste falhar em gerar XML
+            resultados_testes = {
+                "total_testes": 0, "executados": 0, "aprovados": 0,
+                "defeitos_s1": 0, "defeitos_s2": 0, "falhas_por_area": {},
+                "lista_testes": []
+            }
 
-    # Garante reprovação se houver falha de código crítica
-    if s1_codigo > 0:
-        aprovado = False
+        # 3. UNIFICAR OS RESULTADOS (CÓDIGO + TESTES)
+        total_s1 = resultados_testes['defeitos_s1'] + s1_codigo
+        total_s2 = resultados_testes['defeitos_s2'] + s2_codigo
 
-    pdf = PDFReporter.gerar(resultados_testes, aprovado, todos_motivos, fase)
+        # Adiciona as falhas de código na lista de "motivos" do Quality Gate
+        motivos_codigo = [f"[CÓDIGO] {f['mensagem']}" for f in falhas_codigo]
 
-    # Atualiza os resultados globais com os valores reais
-    total_testes = resultados_testes['total_testes']
-    total_aprovados = resultados_testes['aprovados']
-    total_falhas = total_testes - total_aprovados
-    coverage = round((total_aprovados / total_testes * 100) if total_testes > 0 else 0)
+        # 4. QUALITY GATE & RELATÓRIO
+        latest_results["current_stage"] = "QUALITY_GATE"
+        aprovado, motivos_gate = QualityGateEvaluator.avaliar_e2e_para_uat(
+            resultados_testes['total_testes'],
+            resultados_testes['executados'],
+            resultados_testes['aprovados'],
+            total_s1, # Soma total de defeitos críticos
+            total_s2,
+            resultados_testes['falhas_por_area']
+        )
 
-    latest_results["stats"] = {
-        "testsRun": total_testes,
-        "passed": total_aprovados,
-        "failed": total_falhas,
-        "coverage": coverage
-    }
+        # Junta todos os motivos
+        todos_motivos = motivos_codigo + motivos_gate
 
-    latest_results["last_analysis"] = {
-        "arquivo": arquivo.filename if arquivo else codigo.filename,
-        "analise_estatica": resultado_codigo,
-        "analise_dinamica": resultados_testes,
-        "status_final": "APROVADO" if aprovado else "REPROVADO",
-        "s1_total": total_s1,
-        "s2_total": total_s2,
-        "motivos": todos_motivos
-    }
+        # Garante reprovação se houver falha de código crítica
+        if s1_codigo > 0:
+            aprovado = False
 
-    latest_results["analysis_in_progress"] = False
-    latest_results["current_stage"] = "COMPLETED"
+        pdf = PDFReporter.gerar(resultados_testes, aprovado, todos_motivos, fase)
 
-    return {
-        "arquivo": arquivo.filename if arquivo else "Não fornecido",
-        "codigo_fonte": codigo.filename if codigo else "Não fornecido",
-        "analise_estatica": {
-            "debuggable": "Sim (FALHA)" if s1_codigo > 0 else "Não (OK)",
-            "falhas_identificadas": falhas_codigo
-        },
-        "analise_dinamica": resultados_testes,
-        "status_final": "APROVADO" if aprovado else "REPROVADO",
-        "relatorio_pdf": f"{pdf}?t={int(time.time())}" if pdf else None,
-        "modo_execucao": modo_execucao
-    }
+        # Atualiza os resultados globais com os valores reais
+        total_testes = resultados_testes['total_testes']
+        total_aprovados = resultados_testes['aprovados']
+        total_falhas = total_testes - total_aprovados
+        coverage = round((total_aprovados / total_testes * 100) if total_testes > 0 else 0)
+
+        latest_results["stats"] = {
+            "testsRun": total_testes,
+            "passed": total_aprovados,
+            "failed": total_falhas,
+            "coverage": coverage
+        }
+
+        latest_results["last_analysis"] = {
+            "arquivo": arquivo.filename if arquivo else codigo.filename,
+            "analise_estatica": resultado_codigo,
+            "analise_dinamica": resultados_testes,
+            "status_final": "APROVADO" if aprovado else "REPROVADO",
+            "s1_total": total_s1,
+            "s2_total": total_s2,
+            "motivos": todos_motivos
+        }
+
+        latest_results["current_stage"] = "COMPLETED"
+
+        return {
+            "arquivo": arquivo.filename if arquivo else "Não fornecido",
+            "codigo_fonte": codigo.filename if codigo else "Não fornecido",
+            "analise_estatica": {
+                "debuggable": "Sim (FALHA)" if s1_codigo > 0 else "Não (OK)",
+                "falhas_identificadas": falhas_codigo
+            },
+            "analise_dinamica": resultados_testes,
+            "status_final": "APROVADO" if aprovado else "REPROVADO",
+            "relatorio_pdf": f"{pdf}?t={int(time.time())}" if pdf else None,
+            "modo_execucao": modo_execucao
+        }
+    except Exception as e:
+        import traceback
+        print(f"❌ ERRO FATAL NO SERVIDOR: {e}")
+        traceback.print_exc()
+        latest_results["current_stage"] = "ERROR"
+        return JSONResponse(
+            status_code=500, 
+            content={
+                "message": f"Erro interno durante a análise: {str(e)}",
+                "details": traceback.format_exc()
+            }
+        )
+    finally:
+        latest_results["analysis_in_progress"] = False
 
 # Rota alternativa compatível com o front-end
 @app.post("/api/upload-apk")

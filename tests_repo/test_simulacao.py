@@ -71,8 +71,13 @@ def test_04_modo_debug(apk_analisado):
     if apk_analisado is None:
         pytest.skip("APK não carregado.")
     print("DESC: Verificação da flag android:debuggable no Manifesto.")
-    debug = apk_analisado.is_debuggable()
-    assert not debug, "FALHA CRÍTICA: O APK está em modo DEBUG. Não publique em produção."
+    
+    # Correção: Uso de get_element para compatibilidade com versões novas do Androguard
+    # Tenta buscar o atributo debuggable diretamente na tag application
+    val = apk_analisado.get_element("application", "android:debuggable")
+    debug = str(val).lower() == "true" if val else False
+    
+    assert not debug, "[S1] FALHA CRÍTICA: O APK está em modo DEBUG. Risco total de engenharia reversa."
 
 def test_05_assinatura_presente(apk_analisado):
     """Verifica se o APK possui assinaturas (v1/v2/v3)."""
@@ -80,7 +85,7 @@ def test_05_assinatura_presente(apk_analisado):
         pytest.skip("APK não carregado.")
     print("DESC: Verificação da presença de certificados de assinatura.")
     sigs = apk_analisado.get_signature_names()
-    assert len(sigs) > 0, "O APK não está assinado."
+    assert len(sigs) > 0, "[S1] CRÍTICO: O APK não possui assinatura (Release Key). Não pode ser instalado."
 
 def test_06_permissoes_perigosas(apk_analisado):
     """Lista e alerta sobre permissões consideradas perigosas."""
@@ -94,7 +99,7 @@ def test_06_permissoes_perigosas(apk_analisado):
     if encontradas:
         print(f"Permissões perigosas: {encontradas}")
         # Falha para mostrar resultado verdadeiro de risco
-        assert False, f"Permissões de alto risco encontradas: {encontradas}"
+        assert False, f"[S2] ALTO RISCO: Permissões excessivas encontradas: {encontradas}"
     assert True
 
 def test_07_activities_principais(apk_analisado):
@@ -103,7 +108,7 @@ def test_07_activities_principais(apk_analisado):
         pytest.skip("APK não carregado.")
     print("DESC: Verificação da Main Activity no AndroidManifest.")
     main = apk_analisado.get_main_activity()
-    assert main is not None, "Nenhuma Main Activity definida (o app não pode ser aberto pelo launcher)."
+    assert main is not None, "[S1] ERRO: Nenhuma Main Activity definida. O app não abre."
 
 def test_08_arquivos_dex(apk_analisado):
     """Verifica a presença de código compilado (classes.dex)."""
@@ -111,7 +116,7 @@ def test_08_arquivos_dex(apk_analisado):
         pytest.skip("APK não carregado.")
     print("DESC: Verificação da integridade do código compilado (DEX).")
     dex = apk_analisado.get_dex()
-    assert dex is not None, "Arquivo classes.dex não encontrado."
+    assert dex is not None, "[S1] ERRO: Arquivo classes.dex corrompido ou ausente."
 
 def test_09_tamanho_arquivo():
     """Verifica o tamanho físico do arquivo."""
@@ -119,7 +124,7 @@ def test_09_tamanho_arquivo():
     caminho = os.getenv("TARGET_APK_PATH")
     tamanho_mb = os.path.getsize(caminho) / (1024 * 1024)
     print(f"Tamanho: {tamanho_mb:.2f} MB")
-    assert tamanho_mb < 150, f"APK muito grande: {tamanho_mb:.2f} MB"
+    assert tamanho_mb < 150, f"[S2] PERFORMANCE: APK muito grande ({tamanho_mb:.2f} MB). Meta: <150MB."
 
 def test_10_backup_permitido(apk_analisado):
     """Verifica se o backup de dados está permitido (Risco de vazamento)."""
@@ -134,7 +139,7 @@ def test_10_backup_permitido(apk_analisado):
         allow_backup = app_node.get(f"{ns}allowBackup")
         # Se for 'true' (risco)
         if allow_backup == "true":
-             assert False, "Risco Médio: Backup de aplicação permitido (android:allowBackup='true'). Defina como 'false' se não for necessário."
+             assert False, "[S2] SEGURANÇA: Backup de dados permitido (allowBackup=true). Risco de extração de dados."
     assert True
 
 def test_11_trafego_texto_claro(apk_analisado):
@@ -149,7 +154,7 @@ def test_11_trafego_texto_claro(apk_analisado):
     if app_node is not None:
         cleartext = app_node.get(f"{ns}usesCleartextTraffic")
         if cleartext == "true":
-            assert False, "Risco Alto: O app permite comunicação HTTP sem SSL (usesCleartextTraffic='true')."
+            assert False, "[S2] SEGURANÇA: App permite tráfego HTTP não criptografado (Cleartext)."
     assert True
 
 def test_12_componentes_exportados(apk_analisado):
@@ -172,7 +177,7 @@ def test_12_componentes_exportados(apk_analisado):
             
     if expostos:
         print(f"Componentes expostos: {expostos}")
-        assert False, f"Segurança: {len(expostos)} Activities exportadas sem permissão. Verifique o Manifesto."
+        assert False, f"[S1] VULNERABILIDADE: {len(expostos)} Activities exportadas publicamente sem permissão."
     assert True
 
 def test_13_busca_segredos_simples(apk_analisado):
@@ -195,7 +200,7 @@ def test_13_busca_segredos_simples(apk_analisado):
     
     for pat, nome in padroes:
         if re.search(pat, dex_content):
-            assert False, f"Segurança: Possível {nome} encontrada hardcoded no código compilado."
+            assert False, f"[S1] VAZAMENTO: {nome} encontrada hardcoded no código."
     assert True
 
 def test_14_versao_minima_sdk(apk_analisado):
@@ -206,7 +211,7 @@ def test_14_versao_minima_sdk(apk_analisado):
     min_sdk = apk_analisado.get_min_sdk_version()
     print(f"Min SDK: {min_sdk}")
     # API 23 = Android 6.0 (Introdução de permissões em tempo de execução)
-    assert min_sdk and int(min_sdk) >= 23, f"Min SDK ({min_sdk}) muito antigo. Recomenda-se API 23+ para segurança."
+    assert min_sdk and int(min_sdk) >= 23, f"[S2] LEGADO: Min SDK ({min_sdk}) obsoleto. Use API 23+."
 
 def test_15_configuracao_rede_segura(apk_analisado):
     """Verifica se existe configuração de segurança de rede (Certificate Pinning/Cleartext)."""
@@ -239,7 +244,7 @@ def test_16_arquiteturas_nativas(apk_analisado):
 
     # Se tem libs nativas, DEVE ter suporte a 64 bits (arm64-v8a)
     tem_64bit = any("arm64-v8a" in f for f in libs)
-    assert tem_64bit, "FALHA DE LOJA: App possui código nativo mas não suporta arm64-v8a (Obrigatório Google Play)."
+    assert tem_64bit, "[S1] LOJA: App nativo sem suporte a 64-bits (arm64-v8a). Rejeição Google Play."
 
 def test_17_servicos_exportados(apk_analisado):
     """Verifica Services exportados sem permissão (Risco de execução indevida)."""
@@ -259,7 +264,7 @@ def test_17_servicos_exportados(apk_analisado):
             expostos.append(name)
             
     if expostos:
-        assert False, f"Segurança: {len(expostos)} Services exportados sem permissão."
+        assert False, f"[S2] SEGURANÇA: {len(expostos)} Services exportados sem proteção."
     assert True
 
 def test_18_firebase_database_exposto(apk_analisado):
@@ -319,7 +324,7 @@ def test_25_responsividade_toque():
 def test_26_modo_escuro_compatibilidade():
     """Verifica renderização no Dark Mode"""
     print("DESC: Verificação de compatibilidade de recursos de cor com Modo Escuro.")
-    assert simular_validacao(0.95), "Erro Visual: Baixo contraste detectado em modo escuro."
+    assert simular_validacao(0.95), "[S3] UI: Contraste insuficiente no Modo Escuro."
 
 def test_27_orientacao_paisagem():
     """Teste de layout em modo Paisagem (Landscape)"""
