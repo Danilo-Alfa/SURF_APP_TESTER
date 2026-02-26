@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surf App Tester - Quality Gate Platform</title>
+    <title>Surf App Tester - Plataforma de Quality Gate</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,28 +16,35 @@
         }
 
         :root {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #f1f5f9;
+            --bg-primary: #fdfbf7; /* Areia muito suave */
+            --bg-secondary: rgba(255, 255, 255, 0.95);
+            --bg-tertiary: #f0f9ff;
             --bg-card: #ffffff;
-            --accent-primary: #0ea5e9;
-            --accent-secondary: #06b6d4;
+            --accent-primary: #00838f; /* Azul Oceano Profundo */
+            --accent-secondary: #4dd0e1; /* Turquesa */
             --accent-success: #10b981;
             --accent-danger: #ef4444;
             --accent-warning: #f59e0b;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
+            --text-primary: #263238;
+            --text-secondary: #546e7a;
             --text-muted: #94a3b8;
-            --border: #e2e8f0;
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --border: #eceff1;
+            --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg-primary);
+            background-image: linear-gradient(180deg, #e0f7fa 0%, #fff8e1 100%); /* Céu para Areia */
+            background-attachment: fixed;
             color: var(--text-primary);
             line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Poppins', sans-serif;
         }
 
         @keyframes slideInDown {
@@ -79,8 +86,9 @@
 
         /* Header */
         header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
             padding: 20px 24px;
             animation: slideInDown 0.5s ease-out;
             position: sticky;
@@ -109,25 +117,27 @@
             height: 40px;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border-radius: 10px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
             font-weight: 800;
             color: white;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 131, 143, 0.3);
         }
 
         .brand-text h1 {
             font-size: 20px;
             font-weight: 800;
-            color: var(--text-primary);
+            color: var(--accent-primary);
             letter-spacing: -0.5px;
+            text-shadow: none;
         }
 
         .brand-text p {
             font-size: 11px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -162,37 +172,40 @@
         .btn {
             padding: 10px 18px;
             border: none;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
+            border-radius: 50px; /* Pílula */
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
             color: white;
-            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 131, 143, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 131, 143, 0.4);
         }
 
         .btn-secondary {
             background: white;
             color: var(--text-primary);
             border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
 
         .btn-secondary:hover {
             border-color: var(--accent-primary);
-            background: var(--bg-tertiary);
+            color: var(--accent-primary);
         }
 
         /* Main Content */
@@ -204,35 +217,40 @@
 
         /* Upload Section */
         .upload-section {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px dashed #b0bec5;
+            border-radius: 24px;
             padding: 40px;
             text-align: center;
             margin-bottom: 24px;
             cursor: pointer;
             transition: all 0.3s ease;
             animation: slideInUp 0.5s ease-out;
-            color: white;
+            color: var(--text-primary);
         }
 
         .upload-section:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: var(--accent-secondary);
+            box-shadow: 0 10px 30px rgba(77, 208, 225, 0.2);
         }
 
         .upload-icon {
-            font-size: 48px;
+            font-size: 72px;
             margin-bottom: 12px;
+            filter: none;
         }
 
         .upload-section h3 {
             font-size: 22px;
             font-weight: 700;
             margin-bottom: 6px;
+            color: var(--accent-primary);
         }
 
         .upload-section p {
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-secondary);
             font-size: 14px;
         }
 
@@ -246,9 +264,9 @@
         }
 
         .stat-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--bg-card);
+            border: none;
+            border-radius: 20px;
             padding: 20px;
             transition: all 0.3s ease;
             box-shadow: var(--shadow);
@@ -308,9 +326,9 @@
         }
 
         .section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--bg-card);
+            border: none;
+            border-radius: 20px;
             padding: 24px;
             margin-bottom: 24px;
             box-shadow: var(--shadow);
@@ -448,10 +466,19 @@
         }
 
         .metric-item {
-            background: var(--bg-tertiary);
-            border-radius: 10px;
-            padding: 16px;
-            border: 1px solid var(--border);
+            background: linear-gradient(135deg, #ffffff 0%, #e0f7fa 100%);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(0, 131, 143, 0.08);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .metric-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 131, 143, 0.15);
         }
 
         .metric-label {
@@ -469,14 +496,16 @@
 
         /* Terminal */
         .terminal {
-            background: #1e293b;
-            border-radius: 10px;
+            background: #0f172a; /* Noite no mar */
+            border-radius: 16px;
             padding: 16px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
             max-height: 400px;
             overflow-y: auto;
             line-height: 1.7;
+            border: 1px solid #334155;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
         }
 
         .terminal-line {
@@ -595,6 +624,13 @@
 
         const App = () => {
             const [uploadedFile, setUploadedFile] = useState(null);
+            const [fileObj, setFileObj] = useState(null); // Armazena o objeto do arquivo
+            const [uploadedCode, setUploadedCode] = useState(null);
+            const [codeFileObj, setCodeFileObj] = useState(null);
+            const [pdfUrl, setPdfUrl] = useState(null);
+            const [showConfig, setShowConfig] = useState(false);
+            const [config, setConfig] = useState({ fase: 'E2E', useSimulation: true }); // Padrão true para evitar erros
+            const [testResults, setTestResults] = useState([]);
             const [isAnalyzing, setIsAnalyzing] = useState(false);
             const [securityMetrics, setSecurityMetrics] = useState({
                 vulnerabilities: 0,
@@ -606,7 +642,7 @@
             const [analyses, setAnalyses] = useState([
                 {
                     id: 1,
-                    name: 'SAST Analysis',
+                    name: 'Análise SAST',
                     status: 'pending',
                     progress: 0,
                     details: 'Aguardando upload de APK para iniciar',
@@ -614,7 +650,7 @@
                 },
                 {
                     id: 2,
-                    name: 'Mobile Tests',
+                    name: 'Testes Mobile',
                     status: 'pending',
                     progress: 0,
                     details: 'Aguardando SAST para iniciar testes',
@@ -638,7 +674,7 @@
             });
 
             const [logs, setLogs] = useState([
-                { type: 'info', text: 'Platform initialized', time: new Date().toLocaleTimeString('pt-BR', { hour12: false }) }
+                { type: 'info', text: 'Plataforma inicializada', time: new Date().toLocaleTimeString('pt-BR', { hour12: false }) }
             ]);
 
             // Busca estatísticas do backend ao carregar
@@ -652,19 +688,43 @@
                         console.error('Erro ao buscar stats:', error);
                     }
                 };
+
+                const fetchLastAnalysis = async () => {
+                    try {
+                        const response = await fetch('/api/last-analysis');
+                        const data = await response.json();
+                        if (data.success && data.data) {
+                            const last = data.data;
+                            setSecurityMetrics({
+                                vulnerabilities: last.analise_estatica.falhas_identificadas.filter(f => f.severidade === 'S1').length,
+                                s1Defects: last.s1_total,
+                                s2Defects: last.s2_total,
+                                permissions: last.analise_estatica.falhas_identificadas.filter(f => f.tipo === 'PRIVACIDADE').length
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Erro ao buscar última análise:', error);
+                    }
+                };
+
                 fetchStats();
+                fetchLastAnalysis();
             }, []);
 
             const handleFileUpload = async (event) => {
                 const file = event.target.files?.[0];
                 if (!file) return;
 
+                // Feedback imediato: Mostra o GIF assim que o arquivo é selecionado
+                setUploadedFile(file.name);
+                setFileObj(file);
+
                 const time = new Date().toLocaleTimeString('pt-BR', { hour12: false });
                 
                 try {
                     setLogs(prev => [...prev, { 
                         type: 'info', 
-                        text: `Uploading ${file.name}...`, 
+                        text: `Enviando ${file.name}...`, 
                         time 
                     }]);
 
@@ -679,40 +739,53 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        setUploadedFile(file.name);
                         setLogs(prev => [...prev, { 
                             type: 'success', 
-                            text: `APK uploaded: ${file.name} (${data.size})`, 
+                            text: `APK enviado: ${file.name} (${data.size})`, 
                             time 
                         }]);
                     } else {
                         setLogs(prev => [...prev, { 
                             type: 'error', 
-                            text: `Upload failed: ${data.message}`, 
+                            text: `Falha no envio: ${data.message}`, 
                             time 
                         }]);
                     }
                 } catch (error) {
                     setLogs(prev => [...prev, { 
                         type: 'error', 
-                        text: `Error: ${error.message}`, 
+                        text: `Erro: ${error.message}`, 
                         time 
                     }]);
                 }
             };
 
+            const handleCodeUpload = (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                setUploadedCode(file.name);
+                setCodeFileObj(file);
+                setLogs(prev => [...prev, { 
+                    type: 'info', 
+                    text: `Código fonte selecionado: ${file.name}`, 
+                    time: new Date().toLocaleTimeString('pt-BR', { hour12: false }) 
+                }]);
+            };
+
             const handleRunAnalysis = async () => {
-                if (!uploadedFile) {
+                if (!fileObj && !codeFileObj) {
                     const time = new Date().toLocaleTimeString('pt-BR', { hour12: false });
                     setLogs(prev => [...prev, {
                         type: 'error',
-                        text: 'Por favor, faça upload de um APK primeiro',
+                        text: 'Por favor, faça upload de um APK ou Código Fonte primeiro',
                         time
                     }]);
                     return;
                 }
 
                 setIsAnalyzing(true);
+                setPdfUrl(null);
+                setTestResults([]);
                 const time = new Date().toLocaleTimeString('pt-BR', { hour12: false });
 
                 // Inicia SAST Analysis
@@ -731,87 +804,116 @@
 
                 try {
                     const formData = new FormData();
-                    const fileInput = document.getElementById('fileInput');
-                    if (fileInput && fileInput.files[0]) {
-                        formData.append('arquivo', fileInput.files[0]);
-                        formData.append('fase', 'E2E');
+                    if (fileObj) formData.append('arquivo', fileObj);
+                    if (codeFileObj) formData.append('codigo', codeFileObj);
+                    
+                    formData.append('fase', config.fase);
+                    formData.append('forcar_simulacao', config.useSimulation);
 
-                        // Atualiza para Mobile Tests
-                        setAnalyses(prev => prev.map((a, idx) => ({
-                            ...a,
-                            status: idx <= 1 ? 'analyzing' : 'pending',
-                            progress: idx === 0 ? 100 : idx === 1 ? 50 : 0,
-                            details: idx === 0 ? 'Análise SAST concluída' : idx === 1 ? 'Executando testes mobile...' : a.details
-                        })));
+                    setLogs(prev => [...prev, {
+                        type: 'info',
+                        text: `Iniciando testes (Fase: ${config.fase})...`,
+                        time: new Date().toLocaleTimeString('pt-BR', { hour12: false })
+                    }]);
 
-                        setLogs(prev => [...prev, {
-                            type: 'info',
-                            text: 'Executando testes dinâmicos...',
-                            time: new Date().toLocaleTimeString('pt-BR', { hour12: false })
-                        }]);
+                    // Inicia Polling de Status
+                    const pollInterval = setInterval(async () => {
+                        try {
+                            const fileName = fileObj ? fileObj.name : codeFileObj.name;
+                            const res = await fetch(`/api/analysis-status/${fileName}`);
+                            const statusData = await res.json();
+                            
+                            if (statusData.analyses) {
+                                setAnalyses(prev => prev.map((a, idx) => {
+                                    const update = statusData.analyses[idx];
+                                    return { ...a, status: update.status, progress: update.progress };
+                                }));
+                            }
 
-                        const response = await fetch('/executar-teste-apk', {
-                            method: 'POST',
-                            body: formData
-                        });
-
-                        const data = await response.json();
-                        const newTime = new Date().toLocaleTimeString('pt-BR', { hour12: false });
-
-                        // Atualiza estatísticas com valores reais
-                        const statsResponse = await fetch('/api/stats');
-                        const statsData = await statsResponse.json();
-                        setStats(statsData);
-
-                        // Atualiza métricas de segurança
-                        const falhas = data.analise_estatica?.falhas_identificadas || [];
-                        const s1Count = falhas.filter(f => f.severidade === 'S1').length;
-                        const s2Count = falhas.filter(f => f.severidade === 'S2').length;
-
-                        setSecurityMetrics({
-                            vulnerabilities: s1Count,
-                            s1Defects: data.analise_dinamica?.defeitos_s1 || 0,
-                            s2Defects: data.analise_dinamica?.defeitos_s2 || 0,
-                            permissions: falhas.filter(f => f.tipo === 'PRIVACIDADE').length
-                        });
-
-                        // Log das falhas encontradas
-                        if (falhas.length > 0) {
-                            falhas.forEach(falha => {
-                                setLogs(prev => [...prev, {
-                                    type: falha.severidade === 'S1' ? 'error' : 'warning',
-                                    text: `[${falha.severidade}] ${falha.mensagem}`,
-                                    time: newTime
-                                }]);
-                            });
+                            if (statusData.status === 'completed' || statusData.status === 'not_found') {
+                                clearInterval(pollInterval);
+                            }
+                        } catch (e) {
+                            console.error("Polling error", e);
                         }
+                    }, 1000);
 
-                        // Atualiza análises com status final real
-                        const finalStatus = data.status_final === 'APROVADO' ? 'approved' : 'rejected';
-                        setAnalyses(prev => prev.map((a, idx) => ({
-                            ...a,
-                            status: finalStatus,
-                            progress: 100,
-                            details: idx === 0
-                                ? `SAST: ${falhas.length} falhas encontradas`
-                                : idx === 1
-                                    ? `Testes: ${data.analise_dinamica?.aprovados || 0}/${data.analise_dinamica?.total_testes || 0} aprovados`
-                                    : `Quality Gate: ${data.status_final}`
-                        })));
+                    const response = await fetch('/executar-teste-apk', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    clearInterval(pollInterval); // Garante parada do polling
 
+                    const data = await response.json();
+                    const newTime = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+
+                    // Atualiza estatísticas com valores reais
+                    const statsResponse = await fetch('/api/stats');
+                    const statsData = await statsResponse.json();
+                    setStats(statsData);
+
+                    // Atualiza lista detalhada de testes
+                    setTestResults(data.analise_dinamica?.lista_testes || []);
+
+                    // Log do modo de execução
+                    if (data.modo_execucao) {
                         setLogs(prev => [...prev, {
-                            type: data.status_final === 'APROVADO' ? 'success' : 'error',
-                            text: `Análise finalizada: ${data.status_final}`,
+                            type: data.modo_execucao === 'REAL_DEVICE' ? 'success' : 'warning',
+                            text: `Modo de Execução: ${data.modo_execucao}`,
                             time: newTime
                         }]);
+                    }
 
-                        if (data.relatorio_pdf) {
+                    // Atualiza métricas de segurança
+                    const falhas = data.analise_estatica?.falhas_identificadas || [];
+                    const s1Count = falhas.filter(f => f.severidade === 'S1').length;
+                    const s2Count = falhas.filter(f => f.severidade === 'S2').length;
+
+                    setSecurityMetrics({
+                        vulnerabilities: s1Count,
+                        s1Defects: data.analise_dinamica?.defeitos_s1 || 0,
+                        s2Defects: data.analise_dinamica?.defeitos_s2 || 0,
+                        permissions: falhas.filter(f => f.tipo === 'PRIVACIDADE').length
+                    });
+
+                    // Log das falhas encontradas
+                    if (falhas.length > 0) {
+                        falhas.forEach(falha => {
                             setLogs(prev => [...prev, {
-                                type: 'success',
-                                text: `Relatório PDF gerado: ${data.relatorio_pdf}`,
+                                type: falha.severidade === 'S1' ? 'error' : 'warning',
+                                text: `[${falha.severidade}] ${falha.mensagem}`,
                                 time: newTime
                             }]);
-                        }
+                        });
+                    }
+
+                    // Atualiza análises com status final real
+                    const finalStatus = data.status_final === 'APROVADO' ? 'approved' : 'rejected';
+                    setAnalyses(prev => prev.map((a, idx) => ({
+                        ...a,
+                        status: finalStatus,
+                        progress: 100,
+                        details: idx === 0
+                            ? `SAST: ${falhas.length} falhas encontradas`
+                            : idx === 1
+                                ? `Testes: ${data.analise_dinamica?.aprovados || 0}/${data.analise_dinamica?.total_testes || 0} aprovados`
+                                : `Quality Gate: ${data.status_final}`
+                    })));
+
+                    setLogs(prev => [...prev, {
+                        type: data.status_final === 'APROVADO' ? 'success' : 'error',
+                        text: `Análise finalizada: ${data.status_final}`,
+                        time: newTime
+                    }]);
+
+                    if (data.relatorio_pdf) {
+                        setPdfUrl(data.relatorio_pdf);
+                        setLogs(prev => [...prev, {
+                            type: 'success',
+                            text: `Relatório PDF gerado: ${data.relatorio_pdf}`,
+                            time: newTime
+                        }]);
                     }
                 } catch (error) {
                     const errorTime = new Date().toLocaleTimeString('pt-BR', { hour12: false });
@@ -836,84 +938,217 @@
                     <header>
                         <div className="header-content">
                             <div className="brand">
-                                <div className="brand-icon">S</div>
+                                <div className="brand-icon">🏄</div>
                                 <div className="brand-text">
                                     <h1>SURF APP TESTER</h1>
-                                    <p>Quality Gate Platform</p>
+                                    <p>Plataforma de Quality Gate</p>
                                 </div>
                             </div>
                             <div className="header-actions">
                                 <div className="status-badge">
                                     <div className="status-dot"></div>
-                                    <span>Active</span>
+                                    <span>Ativo</span>
                                 </div>
-                                <button className="btn btn-secondary">
-                                    <span>⚙️</span> Config
+                                <button className="btn btn-secondary" onClick={() => setShowConfig(true)}>
+                                    <span>⚙️</span> Configurar
                                 </button>
                                 <button className="btn btn-primary" onClick={handleRunAnalysis}>
-                                    <span>▶️</span> Run Analysis
+                                    <span>▶️</span> Executar Análise
                                 </button>
                             </div>
                         </div>
                     </header>
 
                     <div className="main-content">
-                        <input 
-                            type="file" 
-                            id="fileInput" 
-                            accept=".apk" 
-                            style={{ display: 'none' }} 
-                            onChange={handleFileUpload}
-                        />
-                        <div className="upload-section" onClick={() => document.getElementById('fileInput').click()}>
-                            <div className="upload-icon">📱</div>
-                            <h3>Upload Android APK</h3>
-                            <p>Drop your APK file here or click to browse</p>
-                            {uploadedFile && (
-                                <p style={{ marginTop: '10px', fontWeight: '600' }}>
-                                    ✓ {uploadedFile}
-                                </p>
-                            )}
+                        {showConfig && (
+                            <div style={{
+                                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                                background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}>
+                                <div style={{ background: 'white', padding: '24px', borderRadius: '12px', width: '400px' }}>
+                                    <h3 style={{ marginBottom: '16px' }}>Configurações da Análise</h3>
+                                    <div style={{ marginBottom: '16px' }}>
+                                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>Fase de Teste</label>
+                                        <select 
+                                            value={config.fase}
+                                            onChange={(e) => setConfig({...config, fase: e.target.value})}
+                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}
+                                        >
+                                            <option value="E2E">E2E (End-to-End)</option>
+                                            <option value="UAT">UAT (User Acceptance)</option>
+                                            <option value="SIT">SIT (System Integration)</option>
+                                        </select>
+                                    </div>
+                                    <div style={{ marginBottom: '20px' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <input 
+                                                type="checkbox"
+                                                checked={config.useSimulation}
+                                                onChange={(e) => setConfig({...config, useSimulation: e.target.checked})}
+                                            />
+                                            <span style={{ fontWeight: '600', fontSize: '14px' }}>Modo Análise Estática Profunda (Sem Dispositivo)</span>
+                                        </label>
+                                        <p style={{ fontSize: '12px', color: '#64748b', marginLeft: '24px', marginTop: '4px' }}>Executa testes reais na estrutura do APK sem instalar no celular.</p>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                        <button className="btn btn-primary" onClick={() => setShowConfig(false)}>Salvar & Fechar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div>
+                                <input 
+                                    type="file" 
+                                    id="fileInput" 
+                                    accept=".apk" 
+                                    style={{ display: 'none' }} 
+                                    onChange={handleFileUpload}
+                                />
+                                <div className="upload-section" onClick={() => document.getElementById('fileInput').click()}>
+                                    <div className="upload-icon">🏄‍♂️</div>
+                                    <h3>Pegue sua Prancha (APK)</h3>
+                                    <p>Arraste o arquivo para pegar essa onda de testes</p>
+                                    {uploadedFile && (
+                                        <div style={{ marginTop: '20px', animation: 'slideInUp 0.5s ease-out' }}>
+                                            <p style={{ marginBottom: '12px', fontWeight: '700', color: 'var(--accent-primary)' }}>
+                                                ✓ {uploadedFile}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div>
+                                <input 
+                                    type="file" 
+                                    id="codeInput" 
+                                    accept=".zip,.rar,.tar,.gz" 
+                                    style={{ display: 'none' }} 
+                                    onChange={handleCodeUpload}
+                                />
+                                <div className="upload-section" onClick={() => document.getElementById('codeInput').click()}>
+                                    <div className="upload-icon">🌊</div>
+                                    <h3>Upload do Código Fonte</h3>
+                                    <p>Envie o arquivo .zip para análise no fundo do mar</p>
+                                    {uploadedCode && (
+                                        <p style={{ marginTop: '10px', fontWeight: '600' }}>
+                                            ✓ {uploadedCode}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
+
+                        {pdfUrl && (
+                            <div className="section" style={{ 
+                                background: '#ecfdf5', 
+                                borderColor: '#10b981', 
+                                textAlign: 'center',
+                                marginBottom: '24px',
+                                animation: 'slideInUp 0.5s ease-out'
+                            }}>
+                                <h3 style={{ color: '#047857', marginBottom: '8px' }}>✅ Análise Concluída</h3>
+                                <p style={{ color: '#065f46', marginBottom: '16px' }}>
+                                    O relatório completo com os detalhes dos testes e erros encontrados está pronto.
+                                </p>
+                                <a 
+                                    href={pdfUrl} 
+                                    download 
+                                    className="btn btn-primary" 
+                                    style={{ 
+                                        display: 'inline-flex', 
+                                        margin: '0 auto',
+                                        backgroundColor: '#059669',
+                                        border: 'none',
+                                        padding: '12px 24px',
+                                        fontSize: '16px'
+                                    }}
+                                >
+                                    📄 Baixar Relatório PDF
+                                </a>
+                            </div>
+                        )}
 
                         <div className="stats-grid">
                             <div className="stat-card">
-                                <div className="stat-header">
-                                    <div className="stat-icon">🧪</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                                    <div className="stat-icon">📊</div>
+                                    <div className="stat-label" style={{ margin: 0 }}>Testes Executados</div>
                                 </div>
                                 <div className="stat-value">{stats.testsRun}</div>
-                                <div className="stat-label">Testes Executados</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-header">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                                     <div className="stat-icon">✅</div>
+                                    <div className="stat-label" style={{ margin: 0 }}>Testes Aprovados</div>
                                 </div>
                                 <div className="stat-value" style={{ color: '#10b981' }}>{stats.passed}</div>
-                                <div className="stat-label">Testes Aprovados</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-header">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                                     <div className="stat-icon">❌</div>
+                                    <div className="stat-label" style={{ margin: 0 }}>Falhas Detectadas</div>
                                 </div>
                                 <div className="stat-value" style={{ color: stats.failed > 0 ? '#ef4444' : '#10b981' }}>{stats.failed}</div>
-                                <div className="stat-label">Testes Falharam</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-header">
-                                    <div className="stat-icon">📊</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                                    <div className="stat-icon">📈</div>
+                                    <div className="stat-label" style={{ margin: 0 }}>Taxa de Aprovação</div>
                                 </div>
                                 <div className="stat-value" style={{ color: stats.coverage >= 90 ? '#10b981' : stats.coverage >= 70 ? '#f59e0b' : '#ef4444' }}>{stats.coverage}%</div>
-                                <div className="stat-label">Taxa de Aprovacao</div>
                             </div>
                         </div>
+
+                        {testResults.length > 0 && (
+                            <div className="section">
+                                <div className="section-header">
+                                    <h2 className="section-title">Resultados Detalhados dos Testes</h2>
+                                </div>
+                                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left' }}>
+                                                <th style={{ padding: '10px', color: '#64748b' }}>Status</th>
+                                                <th style={{ padding: '10px', color: '#64748b' }}>Teste</th>
+                                                <th style={{ padding: '10px', color: '#64748b' }}>Mensagem</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {testResults.map((test, idx) => (
+                                                <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                    <td style={{ padding: '10px' }}>
+                                                        <span style={{ 
+                                                            padding: '4px 8px', 
+                                                            borderRadius: '4px', 
+                                                            fontSize: '11px', 
+                                                            fontWeight: '700',
+                                                            backgroundColor: test.status === 'APROVADO' ? '#dcfce7' : '#fee2e2',
+                                                            color: test.status === 'APROVADO' ? '#166534' : '#991b1b'
+                                                        }}>
+                                                            {test.status}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '10px', fontWeight: '500' }}>{test.name}</td>
+                                                    <td style={{ padding: '10px', color: '#64748b' }}>{test.message || '-'}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="content-grid">
                             <div className="content-left">
                                 <div className="section">
                                     <div className="section-header">
                                         <h2 className="section-title">
-                                            Analysis Pipeline
-                                            <span className="section-badge">3 services</span>
+                                            Pipeline de Análise
+                                            <span className="section-badge">3 serviços</span>
                                         </h2>
                                     </div>
 
@@ -929,7 +1164,7 @@
                                                 {analysis.details}
                                             </div>
                                             <div className="service-tag">
-                                                Service: {analysis.service}
+                                                Serviço: {analysis.service}
                                             </div>
                                             <div className="progress-wrapper">
                                                 <div className="progress-bar">
@@ -946,11 +1181,11 @@
 
                                 <div className="section">
                                     <div className="section-header">
-                                        <h2 className="section-title">Security Metrics</h2>
+                                        <h2 className="section-title">Métricas de Segurança</h2>
                                     </div>
                                     <div className="metrics-grid">
                                         <div className="metric-item">
-                                            <div className="metric-label">Vulnerabilities (S1)</div>
+                                            <div className="metric-label">Vulnerabilidades (S1)</div>
                                             <div className="metric-value" style={{ color: securityMetrics.vulnerabilities > 0 ? '#ef4444' : '#10b981' }}>
                                                 {securityMetrics.vulnerabilities}
                                             </div>
@@ -968,7 +1203,7 @@
                                             </div>
                                         </div>
                                         <div className="metric-item">
-                                            <div className="metric-label">Permissions Issues</div>
+                                            <div className="metric-label">Problemas de Permissões</div>
                                             <div className="metric-value">{securityMetrics.permissions}</div>
                                         </div>
                                     </div>
@@ -978,7 +1213,9 @@
                             <div className="content-right">
                                 <div className="section">
                                     <div className="section-header">
-                                        <h2 className="section-title">Console Logs</h2>
+                                        <h2 className="section-title">
+                                            Logs do Console
+                                        </h2>
                                     </div>
                                     <div className="terminal">
                                         {logs.map((log, i) => (

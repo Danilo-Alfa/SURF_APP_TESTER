@@ -3,6 +3,8 @@ from androguard.core.apk import APK
 from androguard.core.dex import DEX
 from typing import Dict
 import re
+import zipfile
+import os
 
 class ApkAnalyzer:
     @staticmethod
@@ -39,7 +41,7 @@ class ApkAnalyzer:
         
         # VERIFICAÇÃO 1: Debuggable
         try:
-            if apk.is_debuggable():
+            if apk.get_application_attribute("debuggable") == "true":
                 relatorio_tecnico["falhas_encontradas"].append({
                     "tipo": "SEGURANÇA",
                     "severidade": "S1",
@@ -51,7 +53,7 @@ class ApkAnalyzer:
         # VERIFICAÇÃO 2: Permissões
         try:
             permissoes = apk.get_permissions() or []
-            permissoes_perigosas = ["android.permission.READ_SMS", "android.permission.SEND_SMS", "android.permission.SYSTEM_ALERT_WINDOW", "android.permission.ACCESS_FINE_LOCATION"]
+            permissoes_perigosas = ["android.permission.READ_SMS", "android.permission.SEND_SMS", "android.permission.SYSTEM_ALERT_WINDOW"]
             for p in permissoes:
                 if any(perigosa in p for perigosa in permissoes_perigosas):
                     relatorio_tecnico["falhas_encontradas"].append({
@@ -110,3 +112,61 @@ class ApkAnalyzer:
             print(f"Erro geral na análise DEX: {e}")
 
         return relatorio_tecnico
+
+    @staticmethod
+    def analisar_source_code(caminho_zip: str) -> Dict:
+        """
+        Descompacta o código fonte e busca por vulnerabilidades (SAST).
+        """
+        print(f"--- Iniciando Análise de Código Fonte (ZIP): {caminho_zip} ---")
+        resultados = {"falhas_encontradas": []}
+        
+        pasta_destino = caminho_zip.replace(".zip", "_extracted")
+        
+        try:
+            # 1. Descompactar
+            if os.path.exists(pasta_destino):
+                import shutil
+                shutil.rmtree(pasta_destino)
+            
+            with zipfile.ZipFile(caminho_zip, 'r') as zip_ref:
+                zip_ref.extractall(pasta_destino)
+            
+            # 2. Padrões de busca (Regex)
+            patterns = {
+                "AWS Access Key": (r"AKIA[0-9A-Z]{16}", "S1"),
+                "Google API Key": (r"AIza[0-9A-Za-z-_]{35}", "S1"),
+                "Senha Hardcoded": (r"(?i)(password|passwd|senha)\s*=\s*['\"][^'\"]+['\"]", "S1"),
+                "Token Hardcoded": (r"(?i)(token|auth)\s*=\s*['\"][a-zA-Z0-9]{10,}['\"]", "S1"),
+                "IP Hardcoded": (r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", "S2"),
+                "TODO/FIXME": (r"(?i)(TODO|FIXME):", "S2")
+            }
+
+            # 3. Varrer arquivos
+            for root, dirs, files in os.walk(pasta_destino):
+                for file in files:
+                    if file.endswith(('.java', '.kt', '.xml', '.js', '.py', '.json')):
+                        path = os.path.join(root, file)
+                        try:
+                            with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                                content = f.read()
+                                for nome, (regex, severidade) in patterns.items():
+                                    if re.search(regex, content):
+                                        # Limita o tamanho da mensagem
+                                        rel_path = os.path.relpath(path, pasta_destino)
+                                        resultados["falhas_encontradas"].append({
+                                            "tipo": "CÓDIGO FONTE",
+                                            "severidade": severidade,
+                                            "mensagem": f"{nome} encontrado em: {rel_path}",
+                                            "arquivo": rel_path
+                                        })
+                        except Exception as e:
+                            print(f"Erro ao ler arquivo {file}: {e}")
+                            
+        except Exception as e:
+            print(f"Erro ao analisar ZIP: {e}")
+            resultados["falhas_encontradas"].append({
+                "tipo": "ERRO", "severidade": "S2", "mensagem": f"Falha ao processar ZIP: {str(e)}"
+            })
+            
+        return resultados

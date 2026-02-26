@@ -1,0 +1,101 @@
+# Ambiente virtual Python
+venv/
+.env/
+
+# Arquivos compilados / cache
+__pycache__/
+*.pyc
+*.pyo
+
+# VS Code
+.vscode/
+
+# Arquivos extraídos / temporários
+storage/
+*.log
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+/* Variáveis de Tema */
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --border-color: #dee2e6;
+    --card-bg: #ffffff;
+    --accent-color: #0d6efd;
+}
+
+/* Sobrescrita para Modo Escuro */
+[data-theme="dark"] {
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --border-color: #333333;
+    --card-bg: #242424;
+    --accent-color: #3d8bfd;
+}
+
+/* Aplicação global das cores */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Exemplo para Cards e Containers */
+.card, .container, .navbar {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+const ThemeToggle = () => {
+    // Inicializa com o tema salvo ou 'light'
+    const [theme, setTheme] = React.useState(localStorage.getItem('theme') || 'light');
+
+    React.useEffect(() => {
+        // Aplica o atributo ao elemento HTML raiz
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+    };
+
+    return (
+        <button 
+            onClick={toggleTheme}
+            className="btn btn-outline-secondary"
+            style={{
+                position: 'fixed',
+                top: '1rem',
+                right: '1rem',
+                zIndex: 1050,
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}
+            title={theme === 'light' ? "Ativar Modo Escuro" : "Ativar Modo Claro"}
+        >
+            {theme === 'light' ? '🌙' : '☀️'}
+        </button>
+    );
+};
+function App() {
+    return (
+        <div className="App">
+            <ThemeToggle />
+            {/* Resto da sua aplicação */}
+            <div className="container">
+                <h1>Surf App Tester</h1>
+                {/* ... */}
+            </div>
+        </div>
+    );
+}

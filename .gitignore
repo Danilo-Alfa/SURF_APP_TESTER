@@ -1,17 +1,21 @@
-# Ambiente virtual
+# ================================
+# 🔒 AMBIENTES VIRTUAIS
+# ================================
 venv/
 env/
 .venv/
 
-# Python
+# ================================
+# 🐍 PYTHON
+# ================================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 build/
-develop-eggs/
 dist/
+develop-eggs/
 downloads/
 eggs/
 .eggs/
@@ -25,34 +29,45 @@ wheels/
 .installed.cfg
 *.egg
 
-# Pytest
+# ================================
+# 🧪 PYTEST / TESTES
+# ================================
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
 .nox/
-
-# Arquivos de resultado de testes
-resultado_real.xml
 *.xml
 
-# Storage (APKs e PDFs gerados)
-storage/*.apk
-storage/*.pdf
+# ================================
+# 📦 STORAGE (ARQUIVOS GERADOS)
+# ================================
+storage/
 
-# IDE
+# ================================
+# 📄 RELATÓRIOS / RESULTADOS
+# ================================
+resultado_real.xml
+*.log
+
+# ================================
+# 💻 IDEs
+# ================================
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
 
-# Sistema
+# ================================
+# 🖥 SISTEMA OPERACIONAL
+# ================================
 .DS_Store
 Thumbs.db
-*.log
 
-# Arquivos de ambiente
+# ================================
+# 🔐 VARIÁVEIS DE AMBIENTE
+# ================================
 .env
 .env.local
 *.local
