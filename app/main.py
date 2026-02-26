@@ -392,26 +392,53 @@ async def get_last_analysis():
 # Bloco para iniciar via 'python -m app.main'
 if __name__ == "__main__":
     import uvicorn
-    
-    # Verificação rápida: Alerta se o ambiente Android não estiver configurado
+
+    # Verificação APRIMORADA do ambiente Android, baseada nos problemas mais comuns
     android_home = os.getenv("ANDROID_HOME")
+    sdk_root_path = ""
+
     if not android_home:
         # Tenta localizar automaticamente no caminho padrão do Windows
         local_app_data = os.environ.get("LOCALAPPDATA", "")
         default_sdk = os.path.join(local_app_data, "Android", "Sdk")
         
         if local_app_data and os.path.exists(default_sdk):
-            print(f"\n⚠️  AVISO: SDK encontrado em '{default_sdk}', mas ANDROID_HOME não está definido.")
-            print(f"   👉 Execute no PowerShell: $env:ANDROID_HOME = \"{default_sdk}\"")
-            print("   👉 Depois reinicie o Appium e esta aplicação.\n")
+            print(f"\n⚠️  AVISO: SDK do Android encontrado em '{default_sdk}', mas a variável de ambiente ANDROID_HOME não está definida.")
+            print(f"   👉 Para habilitar testes em celular, execute no terminal e reinicie: $env:ANDROID_HOME = \"{default_sdk}\"\n")
+            sdk_root_path = default_sdk
         else:
             print("\n⚠️  AVISO: Ambiente Android (SDK) não detectado.")
             print("   👉 O sistema rodará em modo 'ANÁLISE ESTÁTICA' (apenas verificação de código).")
             print("   👉 Para testes em celular físico, o Android SDK é obrigatório.\n")
     elif not os.path.exists(android_home):
-        print(f"\n⚠️  AVISO CRÍTICO: O caminho definido em ANDROID_HOME não existe!")
+        print(f"\n❌ ERRO CRÍTICO: O caminho definido em ANDROID_HOME não existe!")
         print(f"   Caminho atual: {android_home}")
         print("   Certifique-se de que o Android Studio está instalado e o caminho está correto.\n")
+    else:
+        sdk_root_path = android_home
+
+    # Se encontramos um caminho de SDK, vamos validá-lo em detalhes
+    if sdk_root_path:
+        print(f"🔎 Validando SDK do Android em: {sdk_root_path}")
+        platform_tools_path = os.path.join(sdk_root_path, "platform-tools")
+        build_tools_path = os.path.join(sdk_root_path, "build-tools")
+        
+        has_platform_tools = os.path.exists(platform_tools_path) and any(f.startswith("adb") for f in os.listdir(platform_tools_path))
+        has_build_tools = os.path.exists(build_tools_path) and os.listdir(build_tools_path)
+        
+        if "platform-tools" in sdk_root_path.lower() or "build-tools" in sdk_root_path.lower():
+            print(f"❌ ERRO DE CONFIGURAÇÃO: Sua variável ANDROID_HOME aponta para uma subpasta.")
+            print(f"   Valor atual: '{sdk_root_path}'")
+            print(f"   O valor deve ser o caminho RAIZ do SDK, sem incluir 'platform-tools' ou 'build-tools'.")
+            print(f"   Exemplo correto: C:\\Users\\seu_usuario\\AppData\\Local\\Android\\Sdk\n")
+        elif not has_platform_tools:
+            print(f"❌ ERRO: A pasta 'platform-tools' (com adb.exe) não foi encontrada dentro do SDK.")
+            print(f"   👉 Use o SDK Manager do Android Studio para instalar 'Android SDK Platform-Tools'.\n")
+        elif not has_build_tools:
+            print(f"❌ ERRO: A pasta 'build-tools' (com aapt2.exe) não foi encontrada dentro do SDK.")
+            print(f"   👉 Use o SDK Manager do Android Studio para instalar 'Android SDK Build-Tools'.\n")
+        elif has_platform_tools and has_build_tools:
+            print("✅ Ambiente Android SDK parece configurado corretamente.\n")
 
     print("🚀 Iniciando Surf App Tester Platform...")
     print("📱 Front-end disponível em: http://localhost:8000")
