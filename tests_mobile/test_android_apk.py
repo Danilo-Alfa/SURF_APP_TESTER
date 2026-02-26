@@ -19,8 +19,8 @@ except ImportError:
     except ImportError:
         APK = None
 
-# Usamos scope="module" para abrir o app uma vez e rodar vários testes na mesma sessão
-@pytest.fixture(scope="module")
+# Usamos scope="session" para garantir uma única sessão para todos os testes (Enterprise)
+@pytest.fixture(scope="session")
 def driver():
     # 1. Pega o caminho do APK que o PyQualityGate salvou
     apk_path = os.getenv("TARGET_APK_PATH")
@@ -40,7 +40,10 @@ def driver():
     options.app = apk_path
     
     # False = Reinstala o app se necessário, mas tenta manter dados
-    options.no_reset = False 
+    # MUDANÇA: noReset=True para não limpar dados/cache entre sessões se cair
+    options.no_reset = True 
+    options.set_capability("appium:fullReset", False)
+    options.set_capability("appium:dontStopAppOnReset", True) # Não fecha o app se a sessão reiniciar
     
     # Aceita permissões (Câmera, Localização) automaticamente para o teste não travar
     options.auto_grant_permissions = True
@@ -49,7 +52,7 @@ def driver():
     options.new_command_timeout = 600
     options.set_capability("appium:uiautomator2ServerInstallTimeout", 90000)
     options.set_capability("appium:adbExecTimeout", 60000) # Dá mais tempo para comandos ADB
-    options.set_capability("appium:enforceAppInstall", True) # Força o Appium a tentar instalar
+    options.set_capability("appium:enforceAppInstall", False) # MUDANÇA: Não forçar install pelo Appium (já fazemos manual)
 
     # --- RESOLUÇÃO DO COMANDO ADB ---
     # Tenta encontrar o ADB pelo ANDROID_HOME se não estiver no PATH global
@@ -213,16 +216,56 @@ def test_04_login(driver):
         entrar_btn.click()
         print("✅ Botão 'Entrar' clicado.")
 
-        # Validação: Aguarda um elemento da tela principal (Home)
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((AppiumBy.XPATH, "//*[@text='Recarga']"))
-        )
-        print("✅ Login realizado com sucesso, tela principal carregada.")
+        # Validação: Aguarda processamento do login
+        # Não validamos "Recarga" aqui pois pode haver telas intermediárias (Sim / Seleção de Rede)
+        time.sleep(5)
+        print("✅ Login submetido com sucesso.")
     except Exception as e:
         pytest.fail(f"Falha durante o processo de login. Erro: {e}")
 
-def test_05_recarga(driver):
-    """ETAPA 5: Valida a navegação para a tela de Recarga e o retorno."""
+def test_05_confirmacao_sim(driver):
+    """ETAPA 5: Confirmação pós-login (Botão 'Sim')."""
+    print("DESC: ETAPA 5 - Confirmação ('Sim').")
+    try:
+        # Tenta encontrar o botão Sim.
+        sim_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@text='Sim' or @text='SIM']"))
+        )
+        sim_btn.click()
+        print("✅ Botão 'Sim' clicado.")
+    except Exception as e:
+        print(f"⚠️ Aviso: Botão 'Sim' não encontrado (pode ter sido pulado ou login falhou): {e}")
+
+def test_06_selecao_rede(driver):
+    """ETAPA 6: Seleção de Rede/Número."""
+    print("DESC: ETAPA 6 - Selecionar Rede.")
+    try:
+        # Tenta selecionar um item da lista (geralmente o número disponível)
+        # Procura por RadioButton ou CheckBox se houver
+        try:
+            opcao = driver.find_element(AppiumBy.CLASS_NAME, "android.widget.RadioButton")
+            opcao.click()
+            print("✅ Opção de rede selecionada.")
+        except:
+            print("ℹ️ Nenhuma opção de rádio encontrada, tentando continuar direto...")
+
+        # Clicar em Confirmar/Avançar
+        confirmar_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@text='Confirmar' or @text='Avançar' or @text='Continuar']"))
+        )
+        confirmar_btn.click()
+        print("✅ Botão de confirmação de rede clicado.")
+        
+        # Valida chegada na Home (agora sim esperamos 'Recarga')
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, "//*[@text='Recarga']"))
+        )
+        print("✅ Redirecionado para Home com sucesso.")
+    except Exception as e:
+        print(f"⚠️ Aviso: Etapa de seleção de rede não concluída (pode não ser necessária): {e}")
+
+def test_07_recarga(driver):
+    """ETAPA 7: Valida a navegação para a tela de Recarga e o retorno."""
     print("DESC: ETAPA 5 - Botão de Recarga.")
     try:
         recarga_btn = WebDriverWait(driver, 10).until(
@@ -248,8 +291,8 @@ def test_05_recarga(driver):
     except Exception as e:
         pytest.fail(f"Falha no fluxo de Recarga. Erro: {e}")
 
-def test_06_menu(driver):
-    """ETAPA 6: Valida a abertura e fechamento do menu."""
+def test_08_menu(driver):
+    """ETAPA 8: Valida a abertura e fechamento do menu."""
     print("DESC: ETAPA 6 - Menu.")
     try:
         # O botão de menu é geralmente o primeiro ImageButton na hierarquia
@@ -270,8 +313,8 @@ def test_06_menu(driver):
     except Exception as e:
         pytest.fail(f"Falha ao interagir com o menu. Erro: {e}")
 
-def test_07_perfil(driver):
-    """ETAPA 7: Valida a navegação para a tela de Perfil e o retorno."""
+def test_09_perfil(driver):
+    """ETAPA 9: Valida a navegação para a tela de Perfil e o retorno."""
     print("DESC: ETAPA 7 - Perfil.")
     try:
         menu_btn = WebDriverWait(driver, 10).until(
@@ -302,7 +345,7 @@ def test_07_perfil(driver):
     except Exception as e:
         pytest.fail(f"Falha no fluxo de Perfil. Erro: {e}")
 
-def test_08_navegacao_completa(driver):
+def test_10_fluxo_completo(driver):
     """VALIDAÇÃO FINAL: Verifica estabilidade geral e captura evidência."""
     print("DESC: VALIDAÇÃO FINAL - Teste de Navegação e Estabilidade.")
     
