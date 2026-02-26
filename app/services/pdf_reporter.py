@@ -154,6 +154,10 @@ class PDFReporter:
                 teste_nome = falha['teste']
                 desc_teste = falha.get('descricao', 'Verificação de segurança e qualidade.')
                 
+                # Truncate message to prevent PDF overflow (Cell too large error)
+                if len(msg) > 1000:
+                    msg = msg[:1000] + " [...]"
+                
                 # --- Lógica de Inferência de Categoria e Ação ---
                 categoria = "Funcional"
                 acao = "Investigar logs técnicos."
@@ -199,7 +203,7 @@ class PDFReporter:
                 ])
 
             # Larguras: ID/Cat (1.2), Sev (0.6), Desc (3.5), Rec (2.0)
-            t_exec = Table(data_exec, colWidths=[1.0*inch, 0.6*inch, 3.7*inch, 2.0*inch])
+            t_exec = Table(data_exec, colWidths=[1.0*inch, 0.6*inch, 3.7*inch, 2.0*inch], splitByRow=1)
             t_exec.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), COLOR_PRIMARY),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),

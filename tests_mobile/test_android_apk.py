@@ -6,6 +6,9 @@ import subprocess
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # Tenta importar androguard para limpeza prévia (evita erro INSTALL_FAILED_UPDATE_INCOMPATIBLE)
 try:
@@ -135,105 +138,183 @@ def driver():
 
 # --- OS TESTES (O que o celular vai fazer sozinho) ---
 
-def test_01_instalacao_e_abertura(driver):
-    """Verifica se o aplicativo instala e abre corretamente (Contexto Nativo)."""
-    print("DESC: Instala o APK no dispositivo e verifica se a Activity principal abre.")
-    print("Aguardando inicialização do app...")
-    time.sleep(5) # Espera Splash Screen
-    assert driver.current_context == "NATIVE_APP", "O app não iniciou no contexto nativo Android."
-    print("App aberto com sucesso.")
+def test_01_abertura_app(driver):
+    """ETAPA 1: Valida a abertura do app e a exibição da primeira tela."""
+    print("DESC: ETAPA 1 - Validar abertura do aplicativo.")
+    # Aguarda até 20s pela tela inicial, procurando um texto de boas-vindas
+    try:
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, "//*[contains(@text, 'Acessar')]"))
+        )
+        print("✅ App aberto, primeira tela (carrossel) exibida.")
+        assert driver.current_context == "NATIVE_APP"
+    except Exception as e:
+        pytest.fail(f"O aplicativo não abriu ou a tela inicial não carregou em 20 segundos. Erro: {e}")
 
-def test_02_estabilidade_background(driver):
-    """Teste de Estabilidade: Envia app para background e restaura."""
-    print("DESC: Envia o app para segundo plano e restaura para verificar persistência.")
-    print("Enviando app para background por 3 segundos...")
-    driver.background_app(3)
-    time.sleep(2)
-    # Se o app crashar ao voltar, a activity será nula ou o driver perderá conexão
-    assert driver.current_activity is not None, "O app fechou inesperadamente após voltar do background."
-    print("App retornou do background com sucesso.")
+def test_02_carrossel(driver):
+    """ETAPA 2: Navega pelo carrossel de introdução e clica para continuar."""
+    print("DESC: ETAPA 2 - Passar o carrossel.")
+    size = driver.get_window_size()
+    start_x = size['width'] * 0.8
+    end_x = size['width'] * 0.2
+    y = size['height'] / 2
 
-def test_03_rotacao_tela(driver):
-    """Teste de UI: Verifica comportamento ao rotacionar a tela (Landscape/Portrait)."""
-    print("DESC: Rotaciona a tela do dispositivo para verificar quebras de layout.")
-    print("Rotacionando para LANDSCAPE...")
-    driver.orientation = "LANDSCAPE"
-    time.sleep(2)
-    print("Rotacionando para PORTRAIT...")
-    driver.orientation = "PORTRAIT"
-    time.sleep(2)
-    assert True, "Rotação realizada sem crashes."
+    for i in range(3): # Tenta passar por 3 telas do carrossel
+        print(f"Realizando swipe horizontal ({i+1}/3)...")
+        driver.swipe(start_x, y, end_x, y, 400)
+        time.sleep(1)
 
-def test_04_analise_elementos_tela(driver):
-    """Verifica se a tela inicial possui elementos interativos (não está branca/travada)."""
-    print("DESC: Conta os elementos interativos na tela para garantir que não está travada.")
-    # Busca qualquer elemento na tela
-    elementos = driver.find_elements(AppiumBy.XPATH, "//*")
-    qtd = len(elementos)
-    print(f"Elementos encontrados na tela atual: {qtd}")
+    try:
+        continuar_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@text='Continuar' or @text='Acessar']"))
+        )
+        continuar_btn.click()
+        print("✅ Carrossel finalizado, botão 'Continuar' clicado.")
+    except Exception as e:
+        pytest.fail(f"Não foi possível encontrar ou clicar no botão 'Continuar' após o carrossel. Erro: {e}")
+
+def test_03_termos(driver):
+    """ETAPA 3: Aceita os termos de uso para prosseguir."""
+    print("DESC: ETAPA 3 - Aceitar Termos.")
+    try:
+        checkbox = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((AppiumBy.CLASS_NAME, "android.widget.CheckBox"))
+        )
+        checkbox.click()
+        print("✅ Checkbox de termos clicado.")
+        assert checkbox.get_attribute('checked') == 'true', "O checkbox não ficou marcado."
+
+        continuar_btn = driver.find_element(AppiumBy.XPATH, "//*[@text='Continuar']")
+        continuar_btn.click()
+        print("✅ Botão 'Continuar' clicado após aceitar os termos.")
+    except Exception as e:
+        pytest.fail(f"Não foi possível interagir com a tela de Termos de Uso. Erro: {e}")
+
+def test_04_login(driver):
+    """ETAPA 4: Realiza o login com credenciais válidas."""
+    print("DESC: ETAPA 4 - Login.")
+    USUARIO = "99999909914"
+    SENHA = "1234"
     
-    # Salva o XML da tela para debug
-    os.makedirs("storage", exist_ok=True)
-    with open("storage/page_source.xml", "w", encoding="utf-8") as f:
-        f.write(driver.page_source)
+    try:
+        campos_texto = WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((AppiumBy.CLASS_NAME, "android.widget.EditText"))
+        )
+        assert len(campos_texto) >= 2, "Não foram encontrados campos suficientes para login."
+
+        print("Preenchendo CPF/CNPJ...")
+        campos_texto[0].send_keys(USUARIO)
         
-    assert qtd > 0, "A tela parece estar em branco ou travada (Zero elementos encontrados)."
+        print("Preenchendo Senha...")
+        campos_texto[1].send_keys(SENHA)
+        driver.hide_keyboard()
 
-def test_05_busca_botoes_comuns(driver):
-    """Tenta identificar botões comuns (Login, Entrar, Pular) via texto."""
-    print("DESC: Busca por textos comuns (Login, Entrar) via OCR/XML.")
-    termos = ["Login", "Entrar", "Sign In", "Acessar", "Pular", "Skip", "Continuar"]
-    source = driver.page_source
-    encontrados = [t for t in termos if t in source]
+        entrar_btn = driver.find_element(AppiumBy.XPATH, "//*[@text='Entrar']")
+        entrar_btn.click()
+        print("✅ Botão 'Entrar' clicado.")
+
+        # Validação: Aguarda um elemento da tela principal (Home)
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, "//*[@text='Recarga']"))
+        )
+        print("✅ Login realizado com sucesso, tela principal carregada.")
+    except Exception as e:
+        pytest.fail(f"Falha durante o processo de login. Erro: {e}")
+
+def test_05_recarga(driver):
+    """ETAPA 5: Valida a navegação para a tela de Recarga e o retorno."""
+    print("DESC: ETAPA 5 - Botão de Recarga.")
+    try:
+        recarga_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@text='Recarga']"))
+        )
+        recarga_btn.click()
+        print("✅ Botão 'Recarga' clicado.")
+
+        # Valida se a tela de recarga abriu
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, "//*[contains(@text, 'valor')]"))
+        )
+        print("✅ Tela de recarga aberta.")
+
+        driver.back()
+        print("✅ Botão 'Voltar' pressionado.")
+
+        # Valida se retornou para a Home
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, "//*[@text='Recarga']"))
+        )
+        print("✅ Retornou para a tela principal com sucesso.")
+    except Exception as e:
+        pytest.fail(f"Falha no fluxo de Recarga. Erro: {e}")
+
+def test_06_menu(driver):
+    """ETAPA 6: Valida a abertura e fechamento do menu."""
+    print("DESC: ETAPA 6 - Menu.")
+    try:
+        # O botão de menu é geralmente o primeiro ImageButton na hierarquia
+        menu_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((AppiumBy.CLASS_NAME, "android.widget.ImageButton"))
+        )
+        menu_btn.click()
+        print("✅ Botão de menu clicado.")
+
+        # Valida se o menu abriu procurando o item 'Perfil'
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, "//*[@text='Perfil']"))
+        )
+        print("✅ Menu aberto com sucesso.")
+
+        driver.back() # Fecha o menu
+        print("✅ Botão 'Voltar' pressionado para fechar o menu.")
+    except Exception as e:
+        pytest.fail(f"Falha ao interagir com o menu. Erro: {e}")
+
+def test_07_perfil(driver):
+    """ETAPA 7: Valida a navegação para a tela de Perfil e o retorno."""
+    print("DESC: ETAPA 7 - Perfil.")
+    try:
+        menu_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((AppiumBy.CLASS_NAME, "android.widget.ImageButton"))
+        )
+        menu_btn.click()
+
+        perfil_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@text='Perfil']"))
+        )
+        perfil_btn.click()
+        print("✅ Navegou para a tela de Perfil.")
+
+        # Valida se as informações do usuário aparecem
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, "//*[contains(@text, '99999909914')]"))
+        )
+        print("✅ Informações do usuário exibidas na tela de Perfil.")
+
+        driver.back()
+        print("✅ Botão 'Voltar' pressionado.")
+
+        # Valida se retornou para a Home
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((AppiumBy.XPATH, "//*[@text='Recarga']"))
+        )
+        print("✅ Retornou para a tela principal com sucesso.")
+    except Exception as e:
+        pytest.fail(f"Falha no fluxo de Perfil. Erro: {e}")
+
+def test_08_navegacao_completa(driver):
+    """VALIDAÇÃO FINAL: Verifica estabilidade geral e captura evidência."""
+    print("DESC: VALIDAÇÃO FINAL - Teste de Navegação e Estabilidade.")
     
-    if encontrados:
-        print(f"Botões/Textos encontrados: {encontrados}")
-    else:
-        print("Aviso: Nenhum texto de botão padrão encontrado na primeira tela.")
-    
-    # Este teste é informativo, não falha o build
-    assert True
+    # 1. Teste de estabilidade em background
+    print("Enviando app para segundo plano por 5 segundos...")
+    driver.background_app(5)
+    assert driver.current_activity is not None, "O app fechou inesperadamente após voltar do background."
+    print("✅ App permaneceu estável em background.")
 
-def test_06_interacao_swipe_vertical(driver):
-    """Realiza gesto de rolagem (swipe) vertical na tela."""
-    print("DESC: Realiza gesto de rolagem vertical para testar fluidez.")
-    print("Realizando swipe vertical...")
-    # Pega tamanho da tela
-    size = driver.get_window_size()
-    start_y = size['height'] * 0.8
-    end_y = size['height'] * 0.2
-    start_x = size['width'] / 2
-    
-    driver.swipe(start_x, start_y, start_x, end_y, 1000)
-    time.sleep(1)
-    assert True
-
-def test_07_interacao_swipe_horizontal(driver):
-    """Realiza gesto de rolagem (swipe) horizontal."""
-    print("DESC: Realiza gesto de rolagem horizontal (carrossel).")
-    print("Realizando swipe horizontal...")
-    size = driver.get_window_size()
-    start_x = size['width'] * 0.9
-    end_x = size['width'] * 0.1
-    start_y = size['height'] / 2
-    
-    driver.swipe(start_x, start_y, end_x, start_y, 1000)
-    time.sleep(1)
-    assert True
-
-def test_08_validacao_hierarquia_view(driver):
-    """Verifica se a hierarquia de views não está muito profunda (Performance)."""
-    print("DESC: Analisa a profundidade da árvore de views (XML) para performance.")
-    xml = driver.page_source
-    profundidade = xml.count("<android.")
-    print(f"Complexidade aproximada da tela: {profundidade} elementos")
-    assert profundidade > 0
-
-def test_09_screenshot_evidencia(driver):
-    """Captura um screenshot do estado final do teste."""
-    print("DESC: Captura evidência visual (screenshot) da tela final.")
+    # 2. Captura de evidência final
     os.makedirs("storage", exist_ok=True)
     caminho = "storage/screenshot_final.png"
     driver.save_screenshot(caminho)
-    print(f"Screenshot salvo em: {caminho}")
-    assert os.path.exists(caminho), "Falha ao salvar screenshot."
+    assert os.path.exists(caminho), "Falha ao salvar screenshot final."
+    print(f"✅ Evidência final capturada em: {caminho}")
