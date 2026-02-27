@@ -41,6 +41,7 @@
             color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
+            padding-bottom: 70px;
         }
 
         h1, h2, h3, h4 {
@@ -82,6 +83,33 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 0;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(0, 131, 143, 0.15);
+            padding: 20px 24px;
+            text-align: center;
+            box-shadow: 0 -4px 20px -2px rgba(0, 0, 0, 0.05);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .footer-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .footer-text span {
+            color: var(--accent-primary);
         }
 
         /* Header */
@@ -1229,6 +1257,10 @@
                             </div>
                         </div>
                     </div>
+
+                    <footer>
+                        <p className="footer-text">feito por: <span>Sarah Emilly</span> e <span>Danilo Alfa</span></p>
+                    </footer>
                 </>
             );
         };
